@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071224">
+  <meta name="description" content="SmartO - Smart Vehicle QR Identity, Safety and Citizen Communication Platform">
+  <title>SmartO | Smart Vehicle QR Platform</title>
+  
+  <!-- Modern Typography (Plus Jakarta Sans & Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23060b14'/><circle cx='16' cy='16' r='9' fill='none' stroke='%2300f2fe' stroke-width='4'/><rect x='20' y='6' width='4' height='4' fill='%2300f2fe'/><rect x='23' y='11' width='3' height='3' fill='%230084ff'/></svg>">
+  <link rel="stylesheet" href="/styles.css?v=13">
+  <script src="/app.js?v=13" type="module"></script>
+</head>
+<body>
+  <!-- ULTRA-PREMIUM LOGO PRELOADER (Visible on refresh / initial page load) -->
+  <div class="smarto-preloader" id="page-preloader">
+    <div class="preloader-backdrop-glow"></div>
+    
+    <div class="preloader-content">
+      <!-- Animated Ring & Logo -->
+      <div class="preloader-logo-wrap">
+        <div class="preloader-orbital-ring"></div>
+        <div class="preloader-svg-box">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 68" width="220" height="62">
+            <defs>
+              <linearGradient id="preloader-o-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0052d4"/>
+                <stop offset="50%" stop-color="#0084ff"/>
+                <stop offset="100%" stop-color="#00f2fe"/>
+              </linearGradient>
+            </defs>
+            <text x="0" y="38" font-family="'Plus Jakarta Sans', sans-serif" font-weight="900" font-size="42" fill="#ffffff" letter-spacing="-1">SMART</text>
+            <g transform="translate(170, 0)">
+              <circle cx="21" cy="21" r="17" fill="none" stroke="url(#preloader-o-grad)" stroke-width="9"/>
+              <rect x="29" y="1" width="6" height="6" fill="#00aaff"/>
+              <rect x="37" y="-4" width="7" height="7" fill="#00f2fe"/>
+              <rect x="40" y="6" width="5.5" height="5.5" fill="#0084ff"/>
+              <rect x="33" y="9" width="5" height="5" fill="#0052d4"/>
+              <rect x="42" y="13" width="4.5" height="4.5" fill="#00c6ff"/>
+              <rect x="38" y="19" width="3.5" height="3.5" fill="#00f2fe"/>
+            </g>
+            <text x="110" y="55" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="11.5" fill="#38bdf8" letter-spacing="8">INNOVATIONS</text>
+            <text x="110" y="66" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="500" font-size="8.5" fill="#94a3b8">Making the World Smarter.</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Security Sub-Badge -->
+      <div class="preloader-badge">
+        <span class="preloader-dot"></span>
+        <span>CRYPTOGRAPHIC VEHICLE SAFETY NETWORK</span>
+      </div>
+
+      <!-- Animated Cyber Loader Bar -->
+      <div class="preloader-track">
+        <div class="preloader-progress-bar"></div>
+      </div>
+
+      <div class="preloader-status-text">
+        <span>Initializing Secure Workspace...</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="app"></div>
+</body>
+</html>
