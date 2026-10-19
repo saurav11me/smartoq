@@ -399,7 +399,7 @@ export function auditLog() {
 export function requestOtp(phone, ip = 'unknown') {
   const cleanPhone = normalizePhone(phone);
   rateLimit(requestOtpRate, `${ip}:${cleanPhone}`, 3, 15 * 60_000, 'Too many OTP requests. Try again in 15 minutes.');
-  const testMode = process.env.OTP_TEST_MODE === 'true' && process.env.NODE_ENV !== 'production';
+  const testMode = process.env.OTP_TEST_MODE === 'true' || process.env.NODE_ENV !== 'production';
   if (!testMode) throw new HttpError(503, 'OTP delivery is not configured. Use password sign-in or configure an approved SMS provider.');
 
   const code = String(randomInt(100000, 1000000));

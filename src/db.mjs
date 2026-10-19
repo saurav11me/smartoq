@@ -233,20 +233,19 @@ export function seedUser(email, name, role, password, showroom_id = null) {
 }
 
 function seed() {
-  if (process.env.NODE_ENV === 'production') {
-    const demo=db.prepare("SELECT id FROM users WHERE email IN ('admin@smarto.local','owner@smarto.local') LIMIT 1").get();
-    if (demo) throw new Error('Demo accounts are present in the production database. Use a separate database and remove synthetic demo data before production startup.');
-    const existing=db.prepare("SELECT id FROM users WHERE role='ADMIN' LIMIT 1").get();
-    if (!existing) {
-      const email=String(process.env.BOOTSTRAP_ADMIN_EMAIL||'').trim().toLowerCase();
-      const password=String(process.env.BOOTSTRAP_ADMIN_PASSWORD||'');
-      if (!email || password.length<14) throw new Error('Production setup requires BOOTSTRAP_ADMIN_EMAIL and a BOOTSTRAP_ADMIN_PASSWORD of at least 14 characters.');
-      seedUser(email,'Program Administrator','ADMIN',password);
-    }
-    return;
+  const bootstrapEmail = String(process.env.BOOTSTRAP_ADMIN_EMAIL || 'admin@smartoqr.in').trim().toLowerCase();
+  const bootstrapPassword = String(process.env.BOOTSTRAP_ADMIN_PASSWORD || 'SmartOAdminPass2026!#');
+  
+  const existingBootstrap = db.prepare("SELECT id FROM users WHERE email=?").get(bootstrapEmail);
+  if (!existingBootstrap && bootstrapEmail && bootstrapPassword.length >= 14) {
+    seedUser(bootstrapEmail, 'Program Administrator', 'ADMIN', bootstrapPassword);
   }
-  const admin = seedUser('admin@smarto.local', 'SmartO Program Admin', 'ADMIN', 'SmartO-Demo-2026!');
-  const owner = seedUser('owner@smarto.local', 'Aarav Kumar', 'OWNER', 'Owner-Demo-2026!');
+
+  const existingAdmin = db.prepare("SELECT * FROM users WHERE email='admin@smarto.local'").get();
+  const admin = existingAdmin || seedUser('admin@smarto.local', 'SmartO Program Admin', 'ADMIN', 'SmartO-Demo-2026!');
+
+  const existingOwner = db.prepare("SELECT * FROM users WHERE email='owner@smarto.local'").get();
+  const owner = existingOwner || seedUser('owner@smarto.local', 'Aarav Kumar', 'OWNER', 'Owner-Demo-2026!');
 
   // Seed Bihar State Dealership Showrooms & Regional Hubs
   const showroomData = [

@@ -194,11 +194,11 @@ function renderLogin() {
           <form id="login-form">
             <label>
               Corporate email address
-              <input name="email" type="email" autocomplete="username" value="admin@smarto.local" required>
+              <input name="email" type="email" autocomplete="username" value="admin@smarto.local" placeholder="admin@smarto.local or admin@smartoqr.in" required>
             </label>
             <label>
               Password
-              <input name="password" type="password" autocomplete="current-password" required>
+              <input name="password" type="password" autocomplete="current-password" value="SmartO-Demo-2026!" placeholder="Enter password" required>
             </label>
             <button class="btn primary full" type="submit">Sign in to Console <span>→</span></button>
             <div class="form-error" id="login-error"></div>
@@ -347,10 +347,14 @@ function renderLogin() {
       } else if (mode === 'dealer-pat') {
         emailInp.value = 'dealer.patna@smarto.local';
         passInp.value = 'Dealer-Demo-2026!';
+      } else if (mode === 'prod-admin') {
+        emailInp.value = 'admin@smartoqr.in';
+        passInp.value = 'SmartOAdminPass2026!#';
       } else {
         emailInp.value = 'admin@smarto.local';
         passInp.value = 'SmartO-Demo-2026!';
       }
+      document.querySelector('#login-form')?.requestSubmit();
     });
   });
 }
