@@ -177,6 +177,12 @@ function renderLogin() {
         <div style="margin-bottom:18px; text-align:left;">
           ${smartOLogoSvg({ width: 180, height: 48, mode: 'dark' })}
         </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <button type="button" id="btn-back-home" class="btn secondary tiny" style="font-weight:700; padding:4px 10px; font-size:11.5px; cursor:pointer;">
+            ← Back to SmartO Home
+          </button>
+          <span style="font-size:11px; font-weight:700; color:#2563eb;">Bihar Safety Network</span>
+        </div>
         <span class="eyebrow">ENTERPRISE PLATFORM</span>
         <h2>Welcome back</h2>
         <p class="muted">Sign in to manage vehicle QR operations, field stock and alerts.</p>
@@ -6492,6 +6498,815 @@ async function renderStore() {
 }
 
 /* ==========================================================================
+   SmartO Public Landing Page (Parivahan & Bal Suraksha)
+   ========================================================================== */
+function renderLandingPage() {
+  if (!state.landingTab) state.landingTab = 'vehicle';
+  const isHi = state.lang === 'hi';
+
+  const t = {
+    announcement: isHi 
+      ? '🇮🇳 बिहार सरकार (परिवहन विभाग) समर्थित आधिकारिक स्मार्ट सुरक्षा पहल • 25,000+ सुरक्षित वाहन एवं छात्र'
+      : '🇮🇳 Official Safety Initiative • Supported by Govt. of Bihar Ministry of Transport • 25,000+ Vehicles & Students',
+    eyebrow: isHi ? 'स्मार्ट इनोवेशन • बिहार सड़क एवं बाल सुरक्षा मिशन' : 'SMART INNOVATIONS • BIHAR ROAD & CHILD SAFETY NETWORK',
+    heroTitle: isHi
+      ? 'गाड़ी और परिवार की सुरक्षा — <span>अब सिर्फ एक स्मार्ट QR में</span>'
+      : 'Complete Road & Family Safety with <span>Smart Holographic QR Decals</span>',
+    heroSub: isHi
+      ? 'गलत पार्किंग के झगड़े, सड़क दुर्घटनाओं में अपनों की तलाश या भीड़ में बच्चों के बिछड़ने का डर — अब खत्म! बिना मोबाइल नंबर दिखाए, आम नागरिक सीधे कैमरा से स्कैन करके तुरंत कॉल या व्हाट्सएप लोकेशन अलर्ट भेज सकते हैं।'
+      : 'Say goodbye to wrong parking disputes, highway accident distress, and lost child anxiety. Zero phone number exposure — citizens scan with any phone camera to send masked calls and 1-tap WhatsApp GPS alerts without downloading any app.',
+    ctaVehicle: isHi ? '🚗 SmartO परिवहन (वाहन सुरक्षा)' : '🚗 SmartO Parivahan (Vehicle)',
+    ctaSchool: isHi ? '🎒 SmartO बाल सुरक्षा (स्कूल बैज)' : '🎒 SmartO Bal Suraksha (School)',
+    ctaLogin: isHi ? 'पोर्टल लॉगिन 🔐' : 'Portal Sign In 🔐',
+    howItWorks: isHi ? '3 आसान चरणों में समझें' : 'How It Works in 3 Simple Steps',
+    howItWorksSub: isHi ? 'ना किसी ऐप की जरूरत, ना नंबर लीक होने का खतरा' : 'No app download required for citizens • Zero personal number exposure',
+    step1Title: isHi ? '1. अधिकृत QR प्राप्त करें' : '1. Get Your Official QR',
+    step1Desc: isHi ? 'नई गाड़ी डिलीवरी के समय अधिकृत शोरूम से स्मार्ट स्टीकर या पार्टनर स्कूल से एक्रिलिक चाइल्ड सेफ्टी बैज प्राप्त करें।' : 'Receive official holographic decal at dealership vehicle delivery or acrylic badge from partner schools.',
+    step2Title: isHi ? '2. 1 मिनट में सक्रिय करें' : '2. 1-Minute Activation',
+    step2Desc: isHi ? 'शोरूम एग्जीक्यूटिव या स्कूल द्वारा सुरक्षित डिजिटल लिंक। आपातकालीन पारिवारिक संबंध (पिता, माता, भाई आदि) सेट करें।' : 'Quick digital binding with owner mobile and emergency family relations (Father, Mother, Sister).',
+    step3Title: isHi ? '3. 24x7 सार्वजनिक सुरक्षा' : '3. 24x7 Road & Public Protection',
+    step3Desc: isHi ? 'सड़क पर गलत पार्किंग, एक्सीडेंट या भीड़ में बच्चा खोने पर कोई भी नागरिक स्कैन करके तुरंत मदद पहुंचा सकता है।' : 'In case of blocked gates, accidents, or lost child, any citizen scans to connect safely while your number stays 100% private.',
+    vehicleSecTitle: isHi ? 'SmartO परिवहन — 4 सुरक्षा स्तंभ' : 'SmartO Parivahan — 4 Pillars of Vehicle Protection',
+    vehicleSecSub: isHi ? 'स्टिकर पर दिए गए चारों फीचर्स सीधे मोबाइल स्कैन पर लाइव काम करते हैं' : 'Directly maps to the 4 physical pillars on the holographic decal',
+    schoolSecTitle: isHi ? 'SmartO बाल सुरक्षा — छोटे बच्चों की रक्षा' : 'SmartO Child Safety — Cartoon Acrylic SOS Badges',
+    schoolSecSub: isHi ? 'नर्सरी से कक्षा 3 के बच्चों के लिए विशेष एक्रिलिक बैज (गया पितृपक्ष मेला सुरक्षा मॉडल पर आधारित)' : 'Specially designed for Kindergarten to Class 3 students with 1-tap WhatsApp GPS alert',
+    pricingVehicle: isHi ? '₹499 लाइफटाइम वाहन सुरक्षा' : '₹499 Lifetime Road Protection',
+    pricingVehicleSub: isHi ? 'जीएसटी सहित • सिंगल फिक्स्ड पैकेज • अधिकृत शोरूम डिलीवरी' : 'GST Included • Single Fixed Package • Authorized Showroom Delivery',
+    pricingSchool: isHi ? '₹500 प्रति छात्र / वर्ष' : '₹500 Per Student / Year',
+    pricingSchoolSub: isHi ? 'एक्रिलिक बैज + ₹200 स्कूल सुरक्षा फंड साझेदारी' : 'Acrylic Cartoon Badge + ₹200 School Safety Fund Share',
+    aboutTitle: isHi ? 'SmartO इनोवेशंस के बारे में' : 'About SmartO Innovations',
+    aboutSub: isHi ? 'बिहार की सड़कों और बच्चों को देश में सबसे सुरक्षित बनाना हमारा संकल्प है।' : 'Pioneering privacy-first physical QR identities across Bihar state.',
+    contactTitle: isHi ? 'साझेदारी एवं सहायता केंद्र' : 'Partnership & Helpdesk Support'
+  };
+
+  app.innerHTML = `
+    <div class="landing-page">
+      <!-- TOP ANNOUNCEMENT BANNER -->
+      <div class="landing-announcement">
+        <span class="landing-announcement-pill">GOVT. SUPPORTED</span>
+        <span>${esc(t.announcement)}</span>
+      </div>
+
+      <!-- STICKY NAVBAR -->
+      <header class="landing-nav">
+        <div class="landing-nav-inner">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <a href="/" style="text-decoration:none; display:inline-flex; align-items:center;">
+              ${smartOLogoSvg({ width: 175, height: 44, mode: 'dark' })}
+            </a>
+            <span style="font-size:11px; font-weight:800; color:#1d4ed8; background:#eff6ff; border:1px solid #bfdbfe; padding:4px 10px; border-radius:999px; display:inline-flex; align-items:center; gap:6px;">
+              <span>🏛️</span> बिहार सरकार परिवहन
+            </span>
+          </div>
+
+          <nav class="landing-nav-links">
+            <a class="landing-nav-link" href="#parivahan">${isHi ? '🚗 वाहन सुरक्षा' : '🚗 Vehicle Decal'}</a>
+            <a class="landing-nav-link" href="#bal-suraksha">${isHi ? '🎒 बाल सुरक्षा' : '🎒 Child SOS'}</a>
+            <a class="landing-nav-link" href="#how-it-works">${isHi ? '⚙️ कैसे काम करता है' : '⚙️ How It Works'}</a>
+            <a class="landing-nav-link" href="#dealers">${isHi ? '🏢 शोरूम नेटवर्क' : '🏢 Dealerships'}</a>
+            <a class="landing-nav-link" href="#schools">${isHi ? '🏫 स्कूल पार्टनर' : '🏫 Schools'}</a>
+            <a class="landing-nav-link" href="#about">${isHi ? 'ℹ️ हमारे बारे में' : 'ℹ️ About Us'}</a>
+            <a class="landing-nav-link" href="#contact">${isHi ? '📞 संपर्क' : '📞 Contact'}</a>
+          </nav>
+
+          <div class="landing-nav-actions">
+            <div class="landing-lang-toggle">
+              <button type="button" class="landing-lang-btn ${state.lang === 'en' ? 'active' : ''}" data-landing-lang="en">EN</button>
+              <button type="button" class="landing-lang-btn ${state.lang === 'hi' ? 'active' : ''}" data-landing-lang="hi">हिंदी</button>
+            </div>
+            <button type="button" class="btn primary tiny" id="btn-landing-login" style="font-weight:700; padding:8px 16px; border-radius:8px;">
+              ${esc(t.ctaLogin)}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- 1. HERO SECTION -->
+      <section class="landing-hero">
+        <div class="landing-hero-inner">
+          <div>
+            <div class="landing-trust-badge">
+              <span>🏛️</span> ${esc(t.eyebrow)}
+            </div>
+            <h1 class="landing-hero-title">
+              ${t.heroTitle}
+            </h1>
+            <p class="landing-hero-sub">
+              ${esc(t.heroSub)}
+            </p>
+
+            <div class="landing-hero-chips">
+              <span class="landing-chip">🔒 ${isHi ? '100% प्राइवेसी — नंबर सुरक्षित' : 'Zero Phone Number Leaks'}</span>
+              <span class="landing-chip">⚡ ${isHi ? '1-क्लिक GPS व्हाट्सएप लोकेशन' : '1-Tap Emergency GPS Alert'}</span>
+              <span class="landing-chip">📱 ${isHi ? 'आम नागरिक के लिए ऐप जरूरी नहीं' : 'No App Needed for Public'}</span>
+              <span class="landing-chip">🛡️ ${isHi ? 'मौसम-रोधी 3D होलोग्राम स्टीकर' : 'Weatherproof Holographic Decal'}</span>
+            </div>
+
+            <div class="landing-hero-actions">
+              <a href="#parivahan" class="landing-btn-hero primary">
+                ${esc(t.ctaVehicle)}
+              </a>
+              <a href="#bal-suraksha" class="landing-btn-hero secondary">
+                ${esc(t.ctaSchool)}
+              </a>
+              <button type="button" class="btn secondary" id="btn-hero-login" style="font-weight:700; padding:12px 18px;">
+                🔑 ${isHi ? 'पार्टनर कंसोल लॉगिन' : 'Partner Console Login'}
+              </button>
+            </div>
+          </div>
+
+          <!-- Hero Real Product Showcase -->
+          <div class="landing-showcase-box">
+            <div class="landing-showcase-tabs">
+              <button type="button" class="landing-showcase-tab ${state.landingTab === 'vehicle' ? 'active' : ''}" data-landing-tab="vehicle">
+                🚗 ${isHi ? 'वाहन स्टीकर (Parivahan)' : 'Vehicle Decal (Parivahan)'}
+              </button>
+              <button type="button" class="landing-showcase-tab ${state.landingTab === 'school' ? 'active' : ''}" data-landing-tab="school">
+                🎒 ${isHi ? 'चाइल्ड बैज (Child SOS)' : 'Child Badge (Child SOS)'}
+              </button>
+            </div>
+
+            ${state.landingTab === 'vehicle' ? `
+              <div style="text-align:center;">
+                <img src="/assets/sticker_template.jpg" alt="SmartO Official Vehicle Decal" class="landing-sticker-img">
+                <div style="margin-top:14px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+                  <span class="badge" style="background:#dcfce7; color:#15803d; font-size:11px; font-weight:700;">🟢 Contact Owner</span>
+                  <span class="badge" style="background:#fee2e2; color:#b91c1c; font-size:11px; font-weight:700;">🔴 Emergency SOS</span>
+                  <span class="badge" style="background:#dbeafe; color:#1d4ed8; font-size:11px; font-weight:700;">🔵 Wrong Parking</span>
+                  <span class="badge" style="background:#fef3c7; color:#b45309; font-size:11px; font-weight:700;">🟡 Report Hazard</span>
+                </div>
+                <div style="margin-top:16px;">
+                  <button type="button" class="btn primary small" id="btn-demo-vehicle-scan" style="font-weight:700; width:100%;">
+                    ⚡ ${isHi ? 'लाइव व्हीकल स्कैन डेमो देखें (Live Demo)' : 'Test Vehicle Scan Experience (Demo) →'}
+                  </button>
+                </div>
+              </div>
+            ` : `
+              <div style="text-align:center; padding:16px 10px;">
+                <div style="background:linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(6, 182, 212, 0.15) 100%); border:2px solid #10b981; border-radius:20px; padding:24px 16px;">
+                  <div style="font-size:48px; margin-bottom:8px;">🐼🎒</div>
+                  <span class="eyebrow" style="color:#059669; font-weight:800; font-size:11px;">OFFICIAL CHILD SAFETY SOS BADGE</span>
+                  <h3 style="font-size:22px; font-weight:800; margin:6px 0; color:#0f172a;">Priya Kumari</h3>
+                  <div style="font-size:13px; font-weight:600; color:#0284c7; margin-bottom:10px;">Delhi Public School Patna</div>
+                  <div style="display:flex; justify-content:center; gap:8px; margin-bottom:12px;">
+                    <span class="badge" style="background:#ffffff; color:#0f172a; border:1px solid #cbd5e1; font-size:11.5px;">Class 1-A</span>
+                    <span class="badge" style="background:#fee2e2; color:#b91c1c; font-weight:800; font-size:11.5px;">Blood: O+</span>
+                  </div>
+                  <div style="background:#ffffff; padding:12px; border-radius:12px; border:1px solid #bbf7d0; font-size:12px; color:#166534; font-weight:600; text-align:left; display:flex; flex-direction:column; gap:6px;">
+                    <div>📞 Call Father (+91 98112 23344)</div>
+                    <div>📞 Call Mother (+91 98112 23355)</div>
+                    <div>📍 1-Tap WhatsApp GPS Location Broadcast</div>
+                  </div>
+                </div>
+                <div style="margin-top:16px;">
+                  <button type="button" class="btn primary small" id="btn-demo-child-scan" style="font-weight:700; width:100%; background:#059669;">
+                    ⚡ ${isHi ? 'लाइव चाइल्ड बैज स्कैन डेमो देखें (Live Demo)' : 'Test Child Badge SOS Experience (Demo) →'}
+                  </button>
+                </div>
+              </div>
+            `}
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. HOW IT WORKS (3 SIMPLE STEPS) -->
+      <section class="landing-section" id="how-it-works">
+        <div class="landing-section-inner">
+          <div class="landing-sec-header">
+            <span class="landing-sec-eyebrow">SIMPLE & SEAMLESS</span>
+            <h2 class="landing-sec-title">${esc(t.howItWorks)}</h2>
+            <p class="landing-sec-sub">${esc(t.howItWorksSub)}</p>
+          </div>
+
+          <div class="landing-steps-grid">
+            <div class="landing-step-card">
+              <div class="landing-step-num">1</div>
+              <h3 class="landing-step-title">${esc(t.step1Title)}</h3>
+              <p class="landing-step-desc">${esc(t.step1Desc)}</p>
+            </div>
+
+            <div class="landing-step-card">
+              <div class="landing-step-num">2</div>
+              <h3 class="landing-step-title">${esc(t.step2Title)}</h3>
+              <p class="landing-step-desc">${esc(t.step2Desc)}</p>
+            </div>
+
+            <div class="landing-step-card">
+              <div class="landing-step-num">3</div>
+              <h3 class="landing-step-title">${esc(t.step3Title)}</h3>
+              <p class="landing-step-desc">${esc(t.step3Desc)}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. PARIVAHAN / VEHICLE SAFETY (4 PILLARS) -->
+      <section class="landing-section alt" id="parivahan">
+        <div class="landing-section-inner">
+          <div class="landing-sec-header">
+            <span class="landing-sec-eyebrow" style="color:#059669;">SMARTO PARIVAHAN ECOSYSTEM</span>
+            <h2 class="landing-sec-title">${esc(t.vehicleSecTitle)}</h2>
+            <p class="landing-sec-sub">${esc(t.vehicleSecSub)}</p>
+          </div>
+
+          <div class="landing-pillars-grid">
+            <div class="landing-pillar-card landing-pillar-green">
+              <div class="landing-pillar-icon">📞</div>
+              <h4 class="landing-pillar-title">1. CONTACT OWNER</h4>
+              <p class="landing-pillar-sub">
+                ${isHi 
+                  ? 'मालिक का फोन नंबर सुरक्षित रखते हुए मास्क कॉल या व्हाट्सएप मैसेज के ज़रिए तुरंत संपर्क करें।' 
+                  : 'Citizens connect securely through masked voice relay or direct WhatsApp alert without seeing personal mobile numbers.'}
+              </p>
+            </div>
+
+            <div class="landing-pillar-card landing-pillar-red">
+              <div class="landing-pillar-icon">🚨</div>
+              <h4 class="landing-pillar-title">2. EMERGENCY SOS</h4>
+              <p class="landing-pillar-sub">
+                ${isHi 
+                  ? 'सड़क दुर्घटना में पिता/माता/भाई को सीधा कॉल (Call Father/Mother) और 1-क्लिक में लाइव GPS लोकेशन शेयर।' 
+                  : 'Direct calls to verified family relations (Father, Mother, Sister) + instant 1-tap live GPS WhatsApp dispatch.'}
+              </p>
+            </div>
+
+            <div class="landing-pillar-card landing-pillar-blue">
+              <div class="landing-pillar-icon">🅿️</div>
+              <h4 class="landing-pillar-title">3. WRONG PARKING</h4>
+              <p class="landing-pillar-sub">
+                ${isHi 
+                  ? 'गेट ब्लॉक या डबल पार्किंग पर 1-टैप में मालिक को गाड़ी हटाने का त्वरित अलर्ट — टोइंग और विवाद से मुक्ति।' 
+                  : 'Instant 1-click notification pills (Gate Blocked, Double Parked, Please Move) to resolve parking bottlenecks fast.'}
+              </p>
+            </div>
+
+            <div class="landing-pillar-card landing-pillar-amber">
+              <div class="landing-pillar-icon">⚠️</div>
+              <h4 class="landing-pillar-title">4. REPORT HAZARD</h4>
+              <p class="landing-pillar-sub">
+                ${isHi 
+                  ? 'लाइट जलती छूटने, टायर पंचर होने या बारिश में शीशा खुला रहने पर कोई भी नागरिक तुरंत अलर्ट कर सकता है।' 
+                  : 'Report headlights left ON, flat tires, open windows in rain, or hit-and-run damages with photo proof.'}
+              </p>
+            </div>
+          </div>
+
+          <!-- Fixed Pricing Card -->
+          <div style="margin-top:48px;">
+            <div class="landing-pricing-card">
+              <span class="landing-badge-popular">OFFICIAL GOVT. SUPPORTED</span>
+              <div style="font-size:12px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">
+                SMARTO VEHICLE SAFETY DECAL
+              </div>
+              <div style="font-size:42px; font-weight:900; color:#0f172a; margin:4px 0;">
+                ₹499
+                <span style="font-size:14px; font-weight:600; color:#64748b;">(GST Included)</span>
+              </div>
+              <p style="font-size:13.5px; color:#475569; margin-bottom:20px;">
+                ${esc(t.pricingVehicleSub)}
+              </p>
+              <ul style="text-align:left; list-style:none; padding:0; margin:0 0 24px; display:flex; flex-direction:column; gap:10px; font-size:13px; color:#334155;">
+                <li>✓ Official 3M Reflective Holographic Decal</li>
+                <li>✓ Lifetime Road & Parking Protection</li>
+                <li>✓ Zero Phone Number Exposure Guarantee</li>
+                <li>✓ 2 Emergency Family Contacts with Relations</li>
+                <li>✓ Available at Authorized Car & Bike Dealerships</li>
+              </ul>
+              <a href="#dealers" class="btn primary full" style="font-weight:700; padding:12px;">
+                ${isHi ? 'अधिकृत शोरूम पार्टनर सूची देखें →' : 'Find Authorized Dealership Showroom →'}
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. BAL SURAKSHA / SCHOOL CHILD SAFETY -->
+      <section class="landing-section" id="bal-suraksha">
+        <div class="landing-section-inner">
+          <div class="landing-split">
+            <div>
+              <span class="landing-sec-eyebrow" style="color:#0284c7;">CHILD SAFETY ECOSYSTEM</span>
+              <h2 class="landing-sec-title">${esc(t.schoolSecTitle)}</h2>
+              <p class="landing-sec-sub">${esc(t.schoolSecSub)}</p>
+
+              <ul class="landing-feature-list">
+                <li class="landing-feature-item">
+                  <span class="icon">🐼</span>
+                  <div>
+                    <b>${isHi ? 'कार्टून एक्रिलिक बैज (Panda / School Bus):' : 'Cartoon Acrylic Badge (Panda / School Bus):'}</b>
+                    <span>${isHi ? 'नर्सरी से क्लास 3 के बच्चों के लिए आकर्षक व हल्का बैज जिसे बच्चे खुशी-खुशी टाई या शर्ट पर पहनते हैं।' : 'Child-friendly durable acrylic badge that young students love wearing.'}</span>
+                  </div>
+                </li>
+
+                <li class="landing-feature-item">
+                  <span class="icon">📍</span>
+                  <div>
+                    <b>${isHi ? '1-टैप व्हाट्सएप GPS लोकेशन ब्रॉडकास्ट:' : '1-Tap WhatsApp GPS Location Broadcast:'}</b>
+                    <span>${isHi ? 'भीड़भाड़, मेले या बस स्टॉप पर बच्चा बिछड़ने पर जो भी व्यक्ति बैज स्कैन करेगा, एक क्लिक में बच्चे की सटीक लोकेशन माता-पिता के व्हाट्सएप पर पहुंच जाती है।' : 'One button auto-fetches the finder’s exact Google Map location pin and sends it directly to parents.'}</span>
+                  </div>
+                </li>
+
+                <li class="landing-feature-item">
+                  <span class="icon">📞</span>
+                  <div>
+                    <b>${isHi ? 'पारिवारिक एवं स्कूल इमरजेंसी डेस्क:' : 'Family & School Emergency Desk:'}</b>
+                    <span>${isHi ? 'Call Father, Call Mother और Call School Helpdesk — तीनों नंबर बिना किसी ऐप के तुरंत उपलब्ध।' : 'Immediate direct dialing to Father, Mother, and School Principal Helpdesk.'}</span>
+                  </div>
+                </li>
+
+                <li class="landing-feature-item">
+                  <span class="icon">🏛️</span>
+                  <div>
+                    <b>${isHi ? 'गया पितृपक्ष मेला मॉडल से प्रेरित:' : 'Inspired by Gaya Administration Model:'}</b>
+                    <span>${isHi ? 'बिहार प्रशासन द्वारा मेले में खोए बच्चों को ढूंढने के सफल क्यूआर मॉडल को अब स्कूलों में संस्थागत रूप दिया गया है।' : 'Proven administrative lost child protection scaled permanently for Bihar schools.'}</span>
+                  </div>
+                </li>
+              </ul>
+
+              <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:14px; padding:16px; margin-top:20px;">
+                <b style="color:#1d4ed8; font-size:14px; display:block;">🏫 ${isHi ? 'स्कूल साझेदारी मॉडल (₹500 / वर्ष):' : 'School Partnership Model (₹500 / year):'}</b>
+                <span style="font-size:12.5px; color:#334155;">
+                  ${isHi 
+                    ? 'प्रत्येक बैज पर ₹200 सीधे स्कूल सुरक्षा फंड में जाता है तथा ₹300 SmartO टेक्नोलॉजी एवं एक्रिलिक बैज प्रिंटिंग खर्च में रहता है।' 
+                    : 'Transparent revenue sharing: ₹200 contributed to School Child Welfare Fund, ₹300 SmartO badge production & server infra.'}
+                </span>
+              </div>
+            </div>
+
+            <!-- Visual Badge Mockup -->
+            <div style="text-align:center;">
+              <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:24px; padding:32px 24px; box-shadow:var(--shadow-xl); max-width:380px; margin:0 auto;">
+                <div style="font-size:54px; margin-bottom:10px;">🐼🎒</div>
+                <div class="eyebrow" style="color:#059669; font-weight:800; font-size:11px;">OFFICIAL STUDENT SAFETY IDENTITY</div>
+                <h3 style="font-size:24px; font-weight:800; color:#0f172a; margin:4px 0;">Aarav Sharma</h3>
+                <div style="font-size:13px; font-weight:700; color:#0284c7; margin-bottom:14px;">St. Michael's High School, Patna</div>
+                <div style="display:flex; justify-content:center; gap:8px; margin-bottom:16px;">
+                  <span class="badge" style="background:#f1f5f9; color:#0f172a; font-weight:700;">Class 2-B</span>
+                  <span class="badge" style="background:#fee2e2; color:#b91c1c; font-weight:800;">Blood: B+</span>
+                </div>
+
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:12px; font-size:12px; color:#15803d; text-align:left; display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
+                  <div style="display:flex; justify-content:space-between;"><span>Father:</span> <b>+91 98765 43299</b></div>
+                  <div style="display:flex; justify-content:space-between;"><span>Mother:</span> <b>+91 98765 43298</b></div>
+                  <div style="display:flex; justify-content:space-between;"><span>School Helpdesk:</span> <b>+91 612 2262532</b></div>
+                </div>
+
+                <button type="button" class="btn primary small full" id="btn-demo-child-scan-2" style="background:#059669; font-weight:700;">
+                  ⚡ ${isHi ? 'लाइव चाइल्ड SOS स्कैन टेस्ट करें →' : 'Test Child SOS Scan Experience →'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. DEALERSHIP NETWORK SECTION -->
+      <section class="landing-section alt" id="dealers">
+        <div class="landing-section-inner">
+          <div class="landing-sec-header">
+            <span class="landing-sec-eyebrow">AUTOMOTIVE PARTNERSHIPS</span>
+            <h2 class="landing-sec-title">${isHi ? 'बिहार का अग्रणी अधिकृत शोरूम नेटवर्क' : 'Leading Bihar Authorized Dealership Network'}</h2>
+            <p class="landing-sec-sub">
+              ${isHi 
+                ? 'पटना, मुज़फ़्फ़रपुर, गया, भागलपुर एवं दरभंगा के शीर्ष कार एवं दोपहिया शोरूम SmartO द्वारा अधिकृत हैं।' 
+                : 'Over 20+ regional auto hubs across Patna, Muzaffarpur, Gaya, Bhagalpur and Darbhanga partner with SmartO.'}
+            </p>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:18px;">
+            <div class="panel" style="padding:20px; text-align:center;">
+              <div style="font-size:28px; margin-bottom:8px;">🏬</div>
+              <div style="font-weight:800; font-size:16px; color:#0f172a;">Patna Central Motors</div>
+              <div style="font-size:12px; color:#64748b; margin:4px 0 10px;">Maruti Suzuki Arena • Bailey Road</div>
+              <span class="chip" style="background:#dcfce7; color:#15803d; font-size:11px; font-weight:700;">✓ Active Delivery Hub</span>
+            </div>
+
+            <div class="panel" style="padding:20px; text-align:center;">
+              <div style="font-size:28px; margin-bottom:8px;">🏬</div>
+              <div style="font-weight:800; font-size:16px; color:#0f172a;">Bailey Road Hyundai</div>
+              <div style="font-size:12px; color:#64748b; margin:4px 0 10px;">Hyundai Motor India • Danapur</div>
+              <span class="chip" style="background:#dcfce7; color:#15803d; font-size:11px; font-weight:700;">✓ Active Delivery Hub</span>
+            </div>
+
+            <div class="panel" style="padding:20px; text-align:center;">
+              <div style="font-size:28px; margin-bottom:8px;">🏬</div>
+              <div style="font-weight:800; font-size:16px; color:#0f172a;">Kankarbagh Tata Motors</div>
+              <div style="font-size:12px; color:#64748b; margin:4px 0 10px;">Tata Passenger & EV • Patna</div>
+              <span class="chip" style="background:#dcfce7; color:#15803d; font-size:11px; font-weight:700;">✓ Active Delivery Hub</span>
+            </div>
+
+            <div class="panel" style="padding:20px; text-align:center;">
+              <div style="font-size:28px; margin-bottom:8px;">🏬</div>
+              <div style="font-weight:800; font-size:16px; color:#0f172a;">Mithila Maruti Arena</div>
+              <div style="font-size:12px; color:#64748b; margin:4px 0 10px;">Bairiya Hub • Muzaffarpur</div>
+              <span class="chip" style="background:#dcfce7; color:#15803d; font-size:11px; font-weight:700;">✓ Active Regional Hub</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. SCHOOLS NETWORK SECTION -->
+      <section class="landing-section" id="schools">
+        <div class="landing-section-inner">
+          <div class="landing-sec-header">
+            <span class="landing-sec-eyebrow">EDUCATION PARTNERS</span>
+            <h2 class="landing-sec-title">${isHi ? 'पार्टनर स्कूल नेटवर्क' : 'Participating School Partner Network'}</h2>
+            <p class="landing-sec-sub">
+              ${isHi 
+                ? 'स्मार्टो चाइल्ड सेफ्टी प्रोग्राम में शामिल होकर बच्चों को 24x7 सुरक्षित रखने वाले प्रतिष्ठित विद्यालय' 
+                : 'Schools participating in the SmartO Child Safety Badge ecosystem across Patna and Bihar.'}
+            </p>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
+            <div class="panel" style="padding:22px;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                  <h4 style="font-size:16px; font-weight:800; color:#0f172a; margin:0 0 4px;">St. Michael's High School</h4>
+                  <div style="font-size:12px; color:#64748b;">Digha Ghat, Patna • Code: SCH-PAT-001</div>
+                </div>
+                <span style="font-size:24px;">🏫</span>
+              </div>
+              <div style="margin-top:14px; font-size:12px; color:#334155;">
+                Emergency Desk: <b>+91 612 2262532</b>
+              </div>
+              <span class="chip" style="background:#dbeafe; color:#1d4ed8; font-size:10.5px; font-weight:700; margin-top:10px;">Student SOS Enabled</span>
+            </div>
+
+            <div class="panel" style="padding:22px;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                  <h4 style="font-size:16px; font-weight:800; color:#0f172a; margin:0 0 4px;">Delhi Public School Patna</h4>
+                  <div style="font-size:12px; color:#64748b;">Danapur Cantonment, Patna • Code: SCH-PAT-002</div>
+                </div>
+                <span style="font-size:24px;">🏫</span>
+              </div>
+              <div style="margin-top:14px; font-size:12px; color:#334155;">
+                Emergency Desk: <b>+91 612 2558800</b>
+              </div>
+              <span class="chip" style="background:#dbeafe; color:#1d4ed8; font-size:10.5px; font-weight:700; margin-top:10px;">Student SOS Enabled</span>
+            </div>
+
+            <div class="panel" style="padding:22px;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                  <h4 style="font-size:16px; font-weight:800; color:#0f172a; margin:0 0 4px;">Loyola High School</h4>
+                  <div style="font-size:12px; color:#64748b;">Kurji, Sadaquat Ashram, Patna • Code: SCH-PAT-003</div>
+                </div>
+                <span style="font-size:24px;">🏫</span>
+              </div>
+              <div style="margin-top:14px; font-size:12px; color:#334155;">
+                Emergency Desk: <b>+91 612 2262272</b>
+              </div>
+              <span class="chip" style="background:#dbeafe; color:#1d4ed8; font-size:10.5px; font-weight:700; margin-top:10px;">Student SOS Enabled</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. ABOUT US SECTION -->
+      <section class="landing-section alt" id="about">
+        <div class="landing-section-inner">
+          <div class="landing-sec-header">
+            <span class="landing-sec-eyebrow">OUR MISSION</span>
+            <h2 class="landing-sec-title">${esc(t.aboutTitle)}</h2>
+            <p class="landing-sec-sub">${esc(t.aboutSub)}</p>
+          </div>
+
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:20px; padding:36px; max-width:880px; margin:0 auto;">
+            <p style="font-size:15px; color:#334155; line-height:1.7; margin-bottom:18px;">
+              ${isHi
+                ? 'SmartO Innovations एक अग्रणी IoT एवं प्राइवेसी-फर्स्ट डिजिटल सुरक्षा संगठन है, जिसका मुख्यालय पटना (बिहार) में स्थित है। हमारा उद्देश्य बिहार की सड़कों पर गलत पार्किंग के विवादों को समाप्त करना, दुर्घटनाओं में त्वरित पारिवारिक व चिकित्सकीय सहायता पहुंचाना और स्कूली बच्चों को 24x7 सुरक्षा कवच प्रदान करना है।'
+                : 'SmartO Innovations Pvt. Ltd., headquartered in Patna, Bihar, is a privacy-first civic IoT platform. We are committed to making Bihar a model state for road safety and child protection through cryptographic physical QR technology that protects citizen identity without exposing mobile numbers.'}
+            </p>
+            <p style="font-size:15px; color:#334155; line-height:1.7; margin-bottom:0;">
+              ${isHi
+                ? 'बिहार सरकार के परिवहन विभाग के समर्थन और स्थानीय अधिकृत वाहन शोरूम्स व प्रतिष्ठित विद्यालयों के सहयोग से SmartO सुरक्षा प्रणाली पूरे राज्य में तेजी से प्रसारित हो रही है।'
+                : 'Working closely with the Govt. of Bihar Ministry of Transport, top regional automotive dealerships, and leading educational institutions, SmartO is establishing an unmatched network of civic safety across the state.'}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. CONTACT US & PARTNERSHIP INQUIRY -->
+      <section class="landing-section" id="contact">
+        <div class="landing-section-inner">
+          <div class="landing-sec-header">
+            <span class="landing-sec-eyebrow">GET IN TOUCH</span>
+            <h2 class="landing-sec-title">${esc(t.contactTitle)}</h2>
+            <p class="landing-sec-sub">
+              ${isHi ? 'शोरूम ऑनबोर्डिंग, स्कूल पार्टनरशिप या ग्राहक सहायता हेतु संपर्क करें' : 'Reach out for dealership onboarding, school partnerships, or helpdesk assistance.'}
+            </p>
+          </div>
+
+          <div class="landing-contact-grid">
+            <!-- Form -->
+            <div class="landing-contact-card">
+              <h3 style="font-size:18px; font-weight:800; color:#0f172a; margin:0 0 16px;">
+                ${isHi ? 'साझेदारी पूछताछ फॉर्म' : 'Partnership Inquiry Form'}
+              </h3>
+              <form id="landing-contact-form">
+                <label>
+                  ${isHi ? 'आपका शुभ नाम *' : 'Full Name *'}
+                  <input name="name" placeholder="e.g. Rajesh Kumar" required>
+                </label>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                  <label>
+                    ${isHi ? 'मोबाइल नंबर *' : 'Phone Number *'}
+                    <input name="phone" placeholder="e.g. 9876543210" required>
+                  </label>
+
+                  <label>
+                    ${isHi ? 'आप कौन हैं? *' : 'I represent *'}
+                    <select name="type" required>
+                      <option value="Showroom">Automobile Dealership</option>
+                      <option value="School">School / Educational Institute</option>
+                      <option value="Vehicle Owner">Vehicle Owner / Citizen</option>
+                      <option value="Other">Other Inquiry</option>
+                    </select>
+                  </label>
+                </div>
+
+                <label>
+                  ${isHi ? 'शहर / जिला *' : 'City / District *'}
+                  <input name="city" placeholder="e.g. Patna, Muzaffarpur, Gaya" required>
+                </label>
+
+                <label>
+                  ${isHi ? 'आपका संदेश / पूछताछ' : 'Message / Partnership Interest'}
+                  <textarea name="message" rows="3" placeholder="Tell us how we can assist you..."></textarea>
+                </label>
+
+                <button class="btn primary full" type="submit" style="font-weight:700; padding:12px; margin-top:10px;">
+                  ${isHi ? 'पूछताछ भेजें →' : 'Send Partnership Inquiry →'}
+                </button>
+              </form>
+            </div>
+
+            <!-- Direct Contact Info -->
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <div class="panel" style="padding:24px;">
+                <h4 style="font-size:16px; font-weight:800; color:#0f172a; margin:0 0 12px;">
+                  🏢 Central Head Office (Patna)
+                </h4>
+                <div style="font-size:13.5px; color:#475569; line-height:1.6;">
+                  <b>SmartO Innovations Pvt. Ltd.</b><br>
+                  Bailey Road / Exhibition Road Corporate Junction,<br>
+                  Patna, Bihar — 800001, India.
+                </div>
+              </div>
+
+              <div class="panel" style="padding:24px;">
+                <h4 style="font-size:16px; font-weight:800; color:#0f172a; margin:0 0 12px;">
+                  📞 Official Helpline & WhatsApp
+                </h4>
+                <div style="font-size:13.5px; color:#475569; line-height:1.8;">
+                  <div>Phone: <b>+91 98765 43210</b> / <b>+91 98765 43211</b></div>
+                  <div>Email: <a href="mailto:support@smartoqr.in" style="color:#2563eb; text-decoration:none;">support@smartoqr.in</a></div>
+                  <div>Sales: <a href="mailto:sales@smartoqr.in" style="color:#2563eb; text-decoration:none;">sales@smartoqr.in</a></div>
+                  <div>Hours: Monday – Saturday (9:00 AM – 7:00 PM IST)</div>
+                </div>
+              </div>
+
+              <div class="panel" style="padding:20px; background:#eff6ff; border:1px solid #bfdbfe;">
+                <b style="color:#1d4ed8; font-size:13.5px; display:block; margin-bottom:4px;">🔐 Are you an authorized dealer or admin?</b>
+                <span style="font-size:12px; color:#334155;">Access your stock inventory, fitment bays and billing ledger directly.</span>
+                <div style="margin-top:10px;">
+                  <button type="button" class="btn primary small" id="btn-contact-login" style="font-weight:700;">
+                    Sign in to Partner Portal →
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. FOOTER -->
+      <footer class="landing-footer">
+        <div class="landing-footer-inner">
+          <div>
+            <div style="margin-bottom:14px;">
+              ${smartOLogoSvg({ width: 170, height: 44, mode: 'light' })}
+            </div>
+            <p style="font-size:12.5px; line-height:1.6; max-width:320px; margin-bottom:16px;">
+              SmartO Innovations is Bihar's premier cryptographic physical safety network protecting vehicles, owners, citizens, and school children with zero personal phone number exposure.
+            </p>
+            <div style="font-size:11px; color:#38bdf8; font-weight:700;">
+              SUPPORTED BY GOVT. OF BIHAR • MINISTRY OF TRANSPORT
+            </div>
+          </div>
+
+          <div>
+            <h5 class="landing-footer-title">Solutions</h5>
+            <ul class="landing-footer-links">
+              <li><a class="landing-footer-link" href="#parivahan">SmartO Parivahan (₹499)</a></li>
+              <li><a class="landing-footer-link" href="#bal-suraksha">SmartO Bal Suraksha (₹500)</a></li>
+              <li><a class="landing-footer-link" href="#how-it-works">Citizen Scan Gateway</a></li>
+              <li><a class="landing-footer-link" href="#parivahan">Wrong Parking Resolver</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h5 class="landing-footer-title">Portals</h5>
+            <ul class="landing-footer-links">
+              <li><a class="landing-footer-link" id="link-footer-dealer">Dealership Bay Portal</a></li>
+              <li><a class="landing-footer-link" id="link-footer-school">School Partner Desk</a></li>
+              <li><a class="landing-footer-link" id="link-footer-admin">Central Admin Console</a></li>
+              <li><a class="landing-footer-link" id="link-footer-owner">Vehicle Owner Hub</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h5 class="landing-footer-title">Emergency</h5>
+            <ul class="landing-footer-links">
+              <li><span style="color:#ef4444; font-weight:700;">🚨 Police / SOS: 112</span></li>
+              <li><span style="color:#10b981; font-weight:700;">👶 Childline: 1098</span></li>
+              <li><span style="color:#38bdf8;">SmartO Help: +91 9876543210</span></li>
+              <li><a class="landing-footer-link" href="#contact">Partnership Inquiry</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="max-width:1240px; margin:0 auto; padding-top:24px; border-top:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; font-size:11.5px;">
+          <div>© 2026 SmartO Innovations Pvt. Ltd. All Rights Reserved. Patna, Bihar.</div>
+          <div style="display:flex; gap:16px;">
+            <span>Privacy Policy</span>
+            <span>Terms of Service</span>
+            <span>Bihar Transport Compliance</span>
+          </div>
+        </div>
+      </footer>
+      <div id="modal-root"></div>
+    </div>
+  `;
+
+  // Attach Event Listeners
+  // 1. Language switcher
+  document.querySelectorAll('[data-landing-lang]').forEach(b => {
+    b.onclick = () => {
+      state.lang = b.dataset.landingLang;
+      renderLandingPage();
+    };
+  });
+
+  // 2. Showcase tabs
+  document.querySelectorAll('[data-landing-tab]').forEach(b => {
+    b.onclick = () => {
+      state.landingTab = b.dataset.landingTab;
+      renderLandingPage();
+    };
+  });
+
+  // 3. Navigation to Login
+  const goToLogin = () => {
+    history.pushState(null, '', '/login');
+    renderLogin();
+  };
+  document.querySelector('#btn-landing-login')?.addEventListener('click', goToLogin);
+  document.querySelector('#btn-hero-login')?.addEventListener('click', goToLogin);
+  document.querySelector('#btn-contact-login')?.addEventListener('click', goToLogin);
+  document.querySelector('#link-footer-dealer')?.addEventListener('click', goToLogin);
+  document.querySelector('#link-footer-school')?.addEventListener('click', goToLogin);
+  document.querySelector('#link-footer-admin')?.addEventListener('click', goToLogin);
+  document.querySelector('#link-footer-owner')?.addEventListener('click', goToLogin);
+
+  // 4. Live Vehicle Scan Demo
+  document.querySelector('#btn-demo-vehicle-scan')?.addEventListener('click', () => {
+    showLiveScanDemoModal('vehicle');
+  });
+
+  // 5. Live Child Badge Scan Demo
+  document.querySelector('#btn-demo-child-scan')?.addEventListener('click', () => {
+    showLiveScanDemoModal('school');
+  });
+  document.querySelector('#btn-demo-child-scan-2')?.addEventListener('click', () => {
+    showLiveScanDemoModal('school');
+  });
+
+  // 6. Contact Form Submit
+  document.querySelector('#landing-contact-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    toast(`✓ धन्यवाद ${fd.get('name')}! आपकी पूछताछ दर्ज हो गई है। हमारी टीम 2 घंटे में संपर्क करेगी।`, 'success');
+    e.currentTarget.reset();
+  });
+}
+
+function showLiveScanDemoModal(type = 'vehicle') {
+  const root = document.querySelector('#modal-root');
+  if (!root) return;
+
+  if (type === 'vehicle') {
+    root.innerHTML = `
+      <div class="modal-backdrop">
+        <section class="modal-card" style="max-width:540px; padding:0; overflow:hidden; border-radius:20px;">
+          <div style="background:#0f172a; padding:12px 18px; display:flex; justify-content:space-between; align-items:center; color:#fff;">
+            <div style="font-size:12.5px; font-weight:700; display:flex; align-items:center; gap:8px;">
+              <span>🚗</span> SmartO Live Vehicle Citizen Scan Demo
+            </div>
+            <button class="modal-close" data-close style="color:#fff; font-size:22px; cursor:pointer;">×</button>
+          </div>
+
+          <div style="padding:20px; max-height:80vh; overflow-y:auto; background:#f8fafc;">
+            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px; margin-bottom:14px;">
+              <span class="badge" style="background:#dcfce7; color:#15803d; font-weight:800; font-size:10.5px;">✓ VERIFIED VEHICLE</span>
+              <h3 style="margin:6px 0 2px; font-size:18px; color:#0f172a;">Hyundai Creta SX(O)</h3>
+              <div style="font-family:var(--font-mono); font-size:11px; color:#64748b;">BR01••••77 • UNIT NO: SVBR-00001034</div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+              <div class="landing-pillar-card landing-pillar-green" style="padding:14px; cursor:pointer;" onclick="alert('Demo: Masked call connected to owner without revealing phone numbers!')">
+                <div style="font-size:20px;">📞</div>
+                <div style="font-weight:800; font-size:13px;">CONTACT OWNER</div>
+                <div style="font-size:10.5px; opacity:0.9;">Masked Private Call</div>
+              </div>
+
+              <div class="landing-pillar-card landing-pillar-red" style="padding:14px; cursor:pointer;" onclick="alert('Demo: Emergency alert and GPS dispatched to family contacts!')">
+                <div style="font-size:20px;">🚨</div>
+                <div style="font-weight:800; font-size:13px;">EMERGENCY SOS</div>
+                <div style="font-size:10.5px; opacity:0.9;">Call Family & Police</div>
+              </div>
+
+              <div class="landing-pillar-card landing-pillar-blue" style="padding:14px; cursor:pointer;" onclick="alert('Demo: Parking alert sent: Gate Blocked!')">
+                <div style="font-size:20px;">🅿️</div>
+                <div style="font-weight:800; font-size:13px;">WRONG PARKING</div>
+                <div style="font-size:10.5px; opacity:0.9;">1-Click Notification</div>
+              </div>
+
+              <div class="landing-pillar-card landing-pillar-amber" style="padding:14px; cursor:pointer;" onclick="alert('Demo: Hazard reported to owner dashboard!')">
+                <div style="font-size:20px;">⚠️</div>
+                <div style="font-weight:800; font-size:13px;">REPORT ISSUE</div>
+                <div style="font-size:10.5px; opacity:0.9;">Lights ON / Flat Tire</div>
+              </div>
+            </div>
+
+            <div style="background:#fee2e2; border:1px solid #fecaca; border-radius:12px; padding:12px; margin-bottom:12px;">
+              <div style="font-size:11px; font-weight:800; color:#b91c1c; margin-bottom:8px;">🚨 VERIFIED FAMILY EMERGENCY CONTACTS</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <button type="button" class="btn danger small full" onclick="alert('Calling Father directly...')">📞 Call Father</button>
+                <button type="button" class="btn danger small full" onclick="alert('Calling Sister directly...')">📞 Call Sister</button>
+              </div>
+            </div>
+
+            <button type="button" class="btn secondary full" data-close>Close Live Demo</button>
+          </div>
+        </section>
+      </div>
+    `;
+  } else {
+    root.innerHTML = `
+      <div class="modal-backdrop">
+        <section class="modal-card" style="max-width:540px; padding:0; overflow:hidden; border-radius:20px;">
+          <div style="background:#064e3b; padding:12px 18px; display:flex; justify-content:space-between; align-items:center; color:#fff;">
+            <div style="font-size:12.5px; font-weight:700; display:flex; align-items:center; gap:8px;">
+              <span>🎒</span> SmartO Live Child Safety Badge Scan Demo
+            </div>
+            <button class="modal-close" data-close style="color:#fff; font-size:22px; cursor:pointer;">×</button>
+          </div>
+
+          <div style="padding:20px; max-height:80vh; overflow-y:auto; background:#f8fafc;">
+            <div style="background:linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.18) 100%); border:2px solid #10b981; border-radius:16px; padding:20px; text-align:center; margin-bottom:14px;">
+              <div style="font-size:40px; margin-bottom:4px;">🐼🎒</div>
+              <div style="font-size:10.5px; font-weight:800; color:#059669; letter-spacing:1px;">OFFICIAL CHILD SAFETY SOS BADGE</div>
+              <h3 style="margin:4px 0 2px; font-size:20px; color:#0f172a;">Priya Kumari</h3>
+              <div style="font-size:12.5px; font-weight:600; color:#0284c7; margin-bottom:8px;">Delhi Public School Patna</div>
+              <div style="display:flex; justify-content:center; gap:6px;">
+                <span class="badge" style="background:#fff; color:#0f172a; font-size:11px;">Class 1-A</span>
+                <span class="badge" style="background:#fee2e2; color:#b91c1c; font-size:11px; font-weight:800;">Blood: O+</span>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;">
+              <button type="button" class="btn primary full" style="background:#059669; padding:11px; font-weight:700;" onclick="alert('Dialing Parent / Father (+91 98112 23344)...')">
+                📞 Call Parent / Father
+              </button>
+              <button type="button" class="btn primary full" style="background:#059669; padding:11px; font-weight:700;" onclick="alert('Dialing Parent / Mother (+91 98112 23355)...')">
+                📞 Call Parent / Mother
+              </button>
+              <button type="button" class="btn secondary full" style="padding:10px; font-weight:700;" onclick="alert('Dialing DPS Patna Emergency Desk (+91 612 2558800)...')">
+                🏫 Call School Emergency Desk
+              </button>
+              <button type="button" class="btn primary full" style="background:#2563eb; padding:11px; font-weight:700;" onclick="alert('1-Tap WhatsApp GPS Location Sent to Parents WhatsApp with Google Maps Pin!')">
+                📍 Send Found GPS Location to Parents (WhatsApp)
+              </button>
+            </div>
+
+            <button type="button" class="btn secondary full" data-close>Close Live Demo</button>
+          </div>
+        </section>
+      </div>
+    `;
+  }
+
+  root.querySelectorAll('[data-close]').forEach(b => b.onclick = () => root.innerHTML = '');
+  root.querySelector('.modal-backdrop').onclick = (e) => {
+    if (e.target.classList.contains('modal-backdrop')) root.innerHTML = '';
+  };
+}
+
+/* ==========================================================================
    Entry Point
    ========================================================================== */
 async function start() {
@@ -6532,7 +7347,14 @@ async function start() {
     return;
   }
 
-  renderLogin();
+  if (location.pathname === '/login') {
+    renderLogin();
+    dismissPreloader();
+    return;
+  }
+
+  // Default to official landing page for all public visitors
+  renderLandingPage();
   dismissPreloader();
 }
 

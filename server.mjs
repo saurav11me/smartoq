@@ -376,7 +376,9 @@ const server = createServer(async (req, res) => {
 
     if (path.startsWith('/api/')) return json(res, 404, { error: 'API route not found.' });
     if (await staticFile(path, res)) return;
-    if (path.startsWith('/scan/') || path === '/owner' || path === '/admin' || path === '/dealer' || path === '/showroom' || path === '/store') return staticFile('/', res);
+    if (path.startsWith('/scan/') || ['/owner', '/admin', '/dealer', '/showroom', '/store', '/login', '/home', '/about', '/contact', '/parivahan', '/school'].includes(path)) {
+      if (await staticFile('/', res)) return;
+    }
     return json(res, 404, { error: 'Page not found.' });
   } catch (error) {
     const status = error instanceof HttpError ? error.status : 500;
