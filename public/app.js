@@ -1,4 +1,4 @@
-import { createQrSvg, generateOfficialStickerSvg, smartOLogoSvg } from './qr.js';
+import { createQrSvg, generateOfficialStickerSvg, generateSchoolBadgeSvg, smartOLogoSvg } from './qr.js';
 import { buildPrintSheetHtml, downloadDecalsPdf } from './pdf.js';
 
 const app = document.querySelector('#app');
@@ -253,10 +253,10 @@ function renderLogin() {
 
         <div style="margin-top:16px; padding:12px 14px; background:#eff6ff; border-radius:12px; border:1px solid #bfdbfe; font-size:12px; color:#1e40af; display:flex; align-items:center; justify-content:space-between; gap:10px;">
           <div>
-            <b style="display:block; font-size:12.5px;">🛍️ Need SmartO QR for an existing vehicle?</b>
-            <span style="font-size:11px; color:#475569;">Order individual safety decal kits online with free delivery.</span>
+            <b style="display:block; font-size:12.5px;">🛡️ SmartO Safety Ecosystem</b>
+            <span style="font-size:11px; color:#475569;">Official Vehicle Fitment via Authorized Showrooms & Child Safety Badges via Partner Schools.</span>
           </div>
-          <a href="/store" class="btn primary tiny" style="flex-shrink:0; text-decoration:none; padding:6px 12px; font-weight:700;">Visit Store →</a>
+          <span class="chip" style="background:#2563eb; color:#fff; font-size:10.5px; font-weight:700; padding:4px 10px;">Govt. Supported</span>
         </div>
       </section>
     </main>
@@ -396,6 +396,14 @@ function sidebar() {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg>
       </button>
 
+      <button class="rail-item ${state.section === 'sales' ? 'active' : ''}" data-section="sales" title="Sales Team & QR Hierarchy">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </button>
+
+      <button class="rail-item ${state.section === 'schools' ? 'active' : ''}" data-section="schools" title="School & Child Safety Badges">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      </button>
+
       <button class="rail-item ${state.section === 'vehicles' ? 'active' : ''}" data-section="vehicles" title="Vehicle Fleet Registry">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2 10.9 2 11 2 11.2V16c0 .6.4 1 1 1h2m14 0a2 2 0 1 1-4 0m4 0a2 2 0 1 0-4 0M7 17a2 2 0 1 1-4 0m4 0a2 2 0 1 0-4 0"/></svg>
       </button>
@@ -462,10 +470,18 @@ function sidebar() {
       </div>
 
       <div class="nav-group">
-        <div class="nav-group-title">FLEET & NETWORK</div>
+        <div class="nav-group-title">FLEET & DISTRIBUTION</div>
         <button class="nav-item ${state.section === 'showrooms' ? 'selected' : ''}" data-section="showrooms">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg>
           <span>Showrooms & Dealers</span>
+        </button>
+        <button class="nav-item ${state.section === 'sales' ? 'selected' : ''}" data-section="sales">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Sales Team & QR Hierarchy</span>
+        </button>
+        <button class="nav-item ${state.section === 'schools' ? 'selected' : ''}" data-section="schools">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          <span>School Safety Network</span>
         </button>
         <button class="nav-item ${state.section === 'vehicles' ? 'selected' : ''}" data-section="vehicles">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2 10.9 2 11 2 11.2V16c0 .6.4 1 1 1h2m14 0a2 2 0 1 1-4 0m4 0a2 2 0 1 0-4 0M7 17a2 2 0 1 1-4 0m4 0a2 2 0 1 0-4 0"/></svg>
@@ -765,6 +781,8 @@ async function renderAdmin() {
     overview: ['Platform Dashboard', 'Live business operations, showroom adoption, vehicle safety delivery, and privacy integrity.'],
     qr: ['QR Master Registry', 'Batch generation, cryptographic token tracking, and physical QR lifecycle transitions.'],
     showrooms: ['Showrooms & Dealers', 'Authorized dealer stock levels, transit verification and field reconciliations.'],
+    sales: ['Sales Team & QR Hierarchy', 'Field sales executive network, 500-pack serial sequence allocations, and showroom distributions.'],
+    schools: ['School Safety Network', 'Kindergarten to Class 3 student safety badges, high-res pure QR generation, and parent emergency profiles.'],
     vehicles: ['Vehicle Registry', 'Verified vehicles, assigned safety QRs, and privacy-shielded owner linkages.'],
     messages: ['Citizen Alerts Inbox', 'Incoming bystander reports (parking, emergency, damage) with multi-channel dispatch status.'],
     orders: ['Consumer Orders', 'Online consumer purchase, payment webhooks, and direct-to-home dispatch pipeline.'],
@@ -778,6 +796,8 @@ async function renderAdmin() {
     if (state.section === 'overview') await overview();
     if (state.section === 'qr') await qrOperations();
     if (state.section === 'showrooms') await showroomPage();
+    if (state.section === 'sales') await salesPage();
+    if (state.section === 'schools') await schoolsPage();
     if (state.section === 'vehicles') await vehiclePage();
     if (state.section === 'messages') await messagePage();
     if (state.section === 'audit') await auditPage();
@@ -1818,33 +1838,51 @@ async function showBulkPrintModal(initialQrs = null) {
   };
 }
 
-function batchModal() {
+function batchModal(presetCategory = 'VEHICLE') {
   const root = document.querySelector('#modal-root');
   root.innerHTML = `
     <div class="modal-backdrop">
-      <section class="modal-card">
+      <section class="modal-card" style="max-width:540px;">
         <button class="modal-close" data-close>×</button>
-        <span class="eyebrow">FACTORY INVENTORY CREATION</span>
-        <h2>Generate Cryptographic QR Batch</h2>
-        <p class="muted">Creates uniquely indexed QR identifiers and 256-bit unguessable public tokens. Zero owner PII is stored on the physical sticker.</p>
+        <span class="eyebrow" style="color:#0284c7;">INVENTORY BATCH GENERATION</span>
+        <h2>Generate Sequential QR Batch</h2>
+        <p class="muted">Creates uniquely indexed QR identifiers in strict 1-to-N continuous sequence (zero gaps, zero duplicates). Sequence continues from the last generated number.</p>
 
         <form id="batch-form">
           <label>
-            Regional Batch Prefix
-            <input name="prefix" value="SV-BR" maxlength="18" required>
-            <small style="font-size:11px; color:var(--slate-400); display:block; margin-top:4px;">Format: SV-BR (Smart Vehicle Bihar), SV-DL (Delhi), etc.</small>
+            Inventory Category *
+            <select name="category" id="batch-category-select" required>
+              <option value="VEHICLE" ${presetCategory === 'VEHICLE' ? 'selected' : ''}>🚗 Vehicle Decals (Official 3D Holographic Decal Sticker)</option>
+              <option value="SCHOOL" ${presetCategory === 'SCHOOL' ? 'selected' : ''}>🎒 School Child Safety Badges (Pure High-Res QR for Acrylic Cartoon Badges)</option>
+            </select>
+            <small style="font-size:11px; color:var(--slate-400); display:block; margin-top:4px;">
+              Vehicle decals generate with official background graphics. School child safety badges generate as pure high-res vectors for acrylic cartoon cutouts.
+            </small>
           </label>
+
           <label>
-            Batch Production Quantity
+            Serial Prefix Code *
+            <input name="prefix" id="batch-prefix-input" value="${presetCategory === 'SCHOOL' ? 'SCHBR' : 'SVBR'}" maxlength="18" required style="font-family:var(--font-mono); font-weight:700;">
+            <small style="font-size:11px; color:var(--slate-400); display:block; margin-top:4px;">
+              Format: SVBR (Smart Vehicle Bihar), SCHBR (School Bihar), etc. Followed by 8-digit sequence (e.g. SVBR-00000001).
+            </small>
+          </label>
+
+          <label>
+            Batch Production Quantity *
             <input name="quantity" type="number" min="1" max="10000" value="100" required>
-            <small style="font-size:11px; color:var(--slate-400); display:block; margin-top:4px;">Batch scale: 1 to 10,000 units per cryptographic generation run.</small>
+            <small style="font-size:11px; color:var(--slate-400); display:block; margin-top:4px;">Batch scale: 1 to 10,000 units. Sequence runs continuously up to 10,00,000+ units.</small>
           </label>
-          <label>
-            Print Template Spec Version
-            <input name="templateVersion" value="SVQR-2.0" maxlength="32">
-          </label>
+
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:10px 12px; margin:10px 0;">
+            <div style="font-size:11.5px; font-weight:700; color:#1e40af;">Contiguous Sequence Guarantee</div>
+            <div style="font-size:11px; color:#3b82f6; line-height:1.4; margin-top:2px;">
+              Every QR unit in this batch will be generated in exact chronological serial order with zero skipped numbers. The start and end serial numbers will be recorded for audit and distribution.
+            </div>
+          </div>
+
           <div id="batch-error" class="form-error"></div>
-          <div class="modal-actions">
+          <div class="modal-actions" style="margin-top:16px;">
             <button class="btn secondary" type="button" data-close>Cancel</button>
             <button class="btn primary" type="submit">Run Batch Generation →</button>
           </div>
@@ -1852,6 +1890,16 @@ function batchModal() {
       </section>
     </div>
   `;
+
+  const catSelect = root.querySelector('#batch-category-select');
+  const prefixInput = root.querySelector('#batch-prefix-input');
+  catSelect?.addEventListener('change', () => {
+    if (catSelect.value === 'SCHOOL') {
+      prefixInput.value = 'SCHBR';
+    } else {
+      prefixInput.value = 'SVBR';
+    }
+  });
 
   root.querySelectorAll('[data-close]').forEach(b => b.onclick = () => root.innerHTML = '');
   root.querySelector('.modal-backdrop').onclick = (e) => {
@@ -1865,12 +1913,12 @@ function batchModal() {
     err.textContent = '';
     try {
       const res = await post('/api/batches', {
+        category: fd.get('category'),
         prefix: fd.get('prefix'),
-        quantity: Number(fd.get('quantity')),
-        templateVersion: fd.get('templateVersion')
+        quantity: Number(fd.get('quantity'))
       });
       root.innerHTML = '';
-      toast(`Batch ${res.prefix} generated successfully with ${res.quantity} units!`);
+      toast(`✓ Batch ${res.batchId} created! Series: ${res.seriesStart} ➔ ${res.seriesEnd} (${res.quantity} units)`, 'success');
       state.section = 'qr';
       renderAdmin();
     } catch (x) {
@@ -1881,10 +1929,7 @@ function batchModal() {
 
 function showroomModal(presetCity = '', presetState = 'Bihar') {
   const root = document.querySelector('#modal-root');
-  const count = (state.cache.showrooms?.length || 13) + 1;
   const initialCity = presetCity || 'Patna';
-  const prefix = (initialCity.length >= 3 ? initialCity.slice(0, 3).toUpperCase() : 'HUB');
-  const suggestedCode = `${prefix}-${String(count).padStart(3, '0')}`;
 
   const biharCities = [
     'Patna', 'Muzaffarpur', 'Gaya', 'Bhagalpur', 'Darbhanga', 'Purnia',
@@ -1893,79 +1938,99 @@ function showroomModal(presetCity = '', presetState = 'Bihar') {
     'Siwan', 'Sitamarhi', 'Buxar', 'Kishanganj', 'Madhubani', 'Nawada'
   ];
 
+  const popularBrands = [
+    'Maruti Suzuki', 'Hyundai', 'Tata Motors', 'Mahindra', 'Honda',
+    'Hero MotoCorp', 'Bajaj Auto', 'TVS Motor', 'Royal Enfield',
+    'Toyota', 'Kia', 'Suzuki Motorcycle', 'Yamaha', 'Commercial / Multi-Brand'
+  ];
+
   root.innerHTML = `
     <div class="modal-backdrop">
-      <section class="modal-card">
+      <section class="modal-card" style="max-width: 580px;">
         <button class="modal-close" data-close>×</button>
-        <span class="eyebrow">DEALER NETWORK ONBOARDING</span>
+        <span class="eyebrow" style="color:#0284c7;">DEALER NETWORK ONBOARDING</span>
         <h2>Onboard Authorized Dealer Showroom</h2>
-        <p class="muted">Register a new verified dealership distribution point to receive and allocate vehicle QR safety decals.</p>
+        <p class="muted">Register a verified dealership distribution point to receive and allocate vehicle QR safety decals. Manager login credentials will be automatically generated.</p>
 
         <form id="showroom-form">
           <label>
-            Dealership / Showroom Name
+            Dealership Showroom Name *
             <input name="name" placeholder="e.g. Mithila Maruti Suzuki Arena (Bairiya)" required maxlength="120">
           </label>
 
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
             <label>
-              Dealer Code
-              <input name="code" id="modal-dealer-code" value="${suggestedCode}" required maxlength="20" style="text-transform:uppercase; font-family:var(--font-mono);">
-              <small style="font-size:11px; color:var(--slate-400); display:block; margin-top:4px;">Unique dealership identifier</small>
+              Region *
+              <input name="region" placeholder="e.g. Central Bihar, Magadh, Seemanchal" value="Central Bihar" required maxlength="60">
             </label>
             <label>
-              Operational Status
-              <select name="status">
-                <option value="ACTIVE" selected>ACTIVE (Operational)</option>
-                <option value="INACTIVE">INACTIVE (Under Setup)</option>
-              </select>
-            </label>
-          </div>
-
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-            <label>
-              Operating City (Bihar Districts)
+              Operating City *
               <input name="city" id="modal-dealer-city" list="bihar-cities-list" value="${esc(initialCity)}" required maxlength="60" placeholder="e.g. Patna, Muzaffarpur, Gaya">
               <datalist id="bihar-cities-list">
                 ${biharCities.map(c => `<option value="${esc(c)}">`).join('')}
               </datalist>
             </label>
+          </div>
+
+          <label>
+            Address with Map Location *
+            <textarea name="address" rows="2" placeholder="Full showroom physical address and landmarks..." required style="resize:vertical;"></textarea>
+            <input name="mapUrl" placeholder="Google Maps link / GPS pin (Optional)" style="margin-top:6px;">
+          </label>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
             <label>
-              State / Region
-              <select name="state" id="modal-dealer-state">
-                <option value="Bihar" ${presetState === 'Bihar' ? 'selected' : ''}>Bihar</option>
-                <option value="Uttar Pradesh" ${presetState === 'Uttar Pradesh' ? 'selected' : ''}>Uttar Pradesh</option>
-                <option value="Delhi NCR" ${presetState === 'Delhi NCR' ? 'selected' : ''}>Delhi NCR</option>
-                <option value="Jharkhand" ${presetState === 'Jharkhand' ? 'selected' : ''}>Jharkhand</option>
-                <option value="West Bengal" ${presetState === 'West Bengal' ? 'selected' : ''}>West Bengal</option>
+              Dealership Category *
+              <select name="category" required>
+                <option value="Four Wheeler" selected>Four Wheeler (Car / SUV)</option>
+                <option value="Two Wheeler">Two Wheeler (Bike / Scooter)</option>
+                <option value="Commercial">Commercial / Transport</option>
+                <option value="Multi-Brand">Multi-Brand Hub</option>
+              </select>
+            </label>
+            <label>
+              Brand Name *
+              <select name="brand" required>
+                ${popularBrands.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('')}
               </select>
             </label>
           </div>
 
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin:10px 0;">
+            <div style="font-weight:700; font-size:12px; color:#0f172a; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Dealership Leadership & Contacts</div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:8px;">
+              <label style="margin:0;">
+                <span style="font-size:11px;">Owner Full Name</span>
+                <input name="ownerName" placeholder="e.g. Sunil Agarwal" required maxlength="80">
+              </label>
+              <label style="margin:0;">
+                <span style="font-size:11px;">Owner Contact Mobile *</span>
+                <input name="ownerPhone" placeholder="e.g. +91 98765 11001" required maxlength="20">
+              </label>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+              <label style="margin:0;">
+                <span style="font-size:11px;">Showroom Manager Name *</span>
+                <input name="managerName" placeholder="e.g. Amit Sinha" required maxlength="80">
+              </label>
+              <label style="margin:0;">
+                <span style="font-size:11px;">Manager Contact Mobile *</span>
+                <input name="managerPhone" placeholder="e.g. +91 98765 11002" required maxlength="20">
+              </label>
+            </div>
+          </div>
+
           <div id="showroom-error" class="form-error"></div>
-          <div class="modal-actions">
+          <div class="modal-actions" style="margin-top:16px;">
             <button class="btn secondary" type="button" data-close>Cancel</button>
-            <button class="btn primary" type="submit">Register & Activate Showroom →</button>
+            <button class="btn primary" type="submit">✓ Register Showroom & Auto-Generate Access →</button>
           </div>
         </form>
       </section>
     </div>
   `;
-
-  const cityInp = root.querySelector('#modal-dealer-city');
-  const codeInp = root.querySelector('#modal-dealer-code');
-  if (cityInp && codeInp) {
-    cityInp.addEventListener('input', () => {
-      if (!codeInp.dataset.userEdited) {
-        const cVal = cityInp.value.trim();
-        const pfx = (cVal.length >= 3 ? cVal.slice(0, 3).toUpperCase() : 'HUB');
-        codeInp.value = `${pfx}-${String(count).padStart(3, '0')}`;
-      }
-    });
-    codeInp.addEventListener('input', () => {
-      codeInp.dataset.userEdited = 'true';
-    });
-  }
 
   root.querySelectorAll('[data-close]').forEach(b => b.onclick = () => root.innerHTML = '');
   root.querySelector('.modal-backdrop').onclick = (e) => {
@@ -1977,24 +2042,82 @@ function showroomModal(presetCity = '', presetState = 'Bihar') {
     const fd = new FormData(e.currentTarget);
     const err = root.querySelector('#showroom-error');
     err.textContent = '';
+    const submitBtn = e.currentTarget.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Registering & generating credentials...';
+
     try {
       const res = await post('/api/showrooms', {
         name: fd.get('name'),
-        code: fd.get('code'),
+        region: fd.get('region'),
         city: fd.get('city'),
-        state: fd.get('state'),
-        status: fd.get('status')
+        address: fd.get('address'),
+        mapUrl: fd.get('mapUrl'),
+        category: fd.get('category'),
+        brand: fd.get('brand'),
+        ownerName: fd.get('ownerName'),
+        ownerPhone: fd.get('ownerPhone'),
+        managerName: fd.get('managerName'),
+        managerPhone: fd.get('managerPhone')
       });
-      root.innerHTML = '';
-      toast(`Showroom "${res.name}" successfully registered with code ${res.code}!`);
-      if (state.section === 'showrooms') {
-        state.selectedCity = res.city; // Focus directly on the newly added dealer's city!
-        showroomPage();
-      } else {
-        renderAdmin();
-      }
+
+      const creds = res.managerCredentials || {};
+      const showroom = res.showroom || res;
+
+      // Display Success Modal with Credentials
+      root.innerHTML = `
+        <div class="modal-backdrop">
+          <section class="modal-card" style="max-width: 520px; text-align:center;">
+            <div style="font-size:44px; margin-bottom:8px;">🎉</div>
+            <span class="eyebrow" style="color:#059669;">SHOWROOM ONBOARDED SUCCESSFULLY</span>
+            <h2 style="margin-bottom:6px;">${esc(showroom.name)}</h2>
+            <p class="muted" style="margin-bottom:16px;">Dealer Code: <strong style="font-family:monospace; color:#0284c7;">${esc(showroom.code)}</strong> • ${esc(showroom.city)}</p>
+
+            <div style="background:#0f172a; color:#f8fafc; border-radius:12px; padding:16px; text-align:left; margin-bottom:20px;">
+              <div style="font-size:11px; font-weight:700; color:#38bdf8; text-transform:uppercase; margin-bottom:8px;">Showroom Manager Portal Login Credentials</div>
+              <div style="margin-bottom:8px; font-size:13px;">
+                <span style="color:#94a3b8;">Portal URL:</span> <strong>${location.origin}/dealer</strong>
+              </div>
+              <div style="margin-bottom:8px; font-size:13px;">
+                <span style="color:#94a3b8;">Username / Email:</span> <strong style="font-family:monospace; color:#34d399;">${esc(creds.email)}</strong>
+              </div>
+              <div style="font-size:13px;">
+                <span style="color:#94a3b8;">Temporary Password:</span> <strong style="font-family:monospace; color:#fbbf24;">${esc(creds.tempPassword)}</strong>
+              </div>
+            </div>
+
+            <div class="modal-actions" style="justify-content:center; gap:10px;">
+              <button class="btn secondary" type="button" id="btn-copy-creds">
+                📋 Copy Login Details
+              </button>
+              <button class="btn primary" type="button" id="btn-creds-done">
+                Done & View Showrooms →
+              </button>
+            </div>
+          </section>
+        </div>
+      `;
+
+      root.querySelector('#btn-copy-creds')?.addEventListener('click', () => {
+        const text = `SmartO Showroom Manager Login\nShowroom: ${showroom.name} (${showroom.code})\nPortal: ${location.origin}/dealer\nUsername: ${creds.email}\nPassword: ${creds.tempPassword}`;
+        navigator.clipboard?.writeText(text);
+        toast('Login credentials copied to clipboard!', 'success');
+      });
+
+      root.querySelector('#btn-creds-done')?.addEventListener('click', () => {
+        root.innerHTML = '';
+        if (state.section === 'showrooms') {
+          state.selectedCity = showroom.city;
+          showroomPage();
+        } else {
+          renderAdmin();
+        }
+      });
+
     } catch (x) {
       err.textContent = x.message;
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✓ Register Showroom & Auto-Generate Access →';
     }
   };
 }
@@ -3148,6 +3271,853 @@ async function vehiclePage() {
   `;
 }
 
+/* ==========================================================================
+   Sales Team & 3-Level QR Inventory Hierarchy
+   ========================================================================== */
+async function salesPage() {
+  const [rawAgents, rawShowrooms, qrs] = await Promise.all([
+    api('/api/sales/agents').catch(() => ({ items: [] })),
+    api('/api/showrooms').catch(() => ({ items: [] })),
+    api('/api/qrs').catch(() => ({ items: [] }))
+  ]);
+
+  const agents = Array.isArray(rawAgents) ? rawAgents : (rawAgents.items || []);
+  const showrooms = Array.isArray(rawShowrooms) ? rawShowrooms : (rawShowrooms.items || []);
+
+  const centralStock = qrs.items?.filter(x => x.status === 'CENTRAL_STOCK')?.length || 0;
+  const inHandStock = agents.reduce((sum, a) => sum + (Number(a.inHandCount) || 0), 0);
+  const distributedStock = agents.reduce((sum, a) => sum + (Number(a.distributedCount) || 0), 0);
+
+  const container = document.querySelector('.page-wrap');
+  container.innerHTML = `
+    <!-- KPI METRICS -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px; margin-bottom:20px;">
+      <div class="panel" style="padding:16px;">
+        <div style="font-size:12px; font-weight:700; color:var(--slate-500); text-transform:uppercase;">Field Sales Executives</div>
+        <div style="font-size:24px; font-weight:800; color:#2563eb; margin:6px 0 2px;">${agents.length} <span style="font-size:13px; font-weight:600; color:var(--slate-400);">Agents</span></div>
+        <div style="font-size:11px; color:var(--slate-400);">Active Bihar ground team</div>
+      </div>
+
+      <div class="panel" style="padding:16px;">
+        <div style="font-size:12px; font-weight:700; color:var(--slate-500); text-transform:uppercase;">Central Admin Stock</div>
+        <div style="font-size:24px; font-weight:800; color:#0284c7; margin:6px 0 2px;">${centralStock} <span style="font-size:13px; font-weight:600; color:var(--slate-400);">Units</span></div>
+        <div style="font-size:11px; color:var(--slate-400);">Available for agent allocation</div>
+      </div>
+
+      <div class="panel" style="padding:16px;">
+        <div style="font-size:12px; font-weight:700; color:var(--slate-500); text-transform:uppercase;">In-Hand Field Stock</div>
+        <div style="font-size:24px; font-weight:800; color:#d97706; margin:6px 0 2px;">${inHandStock} <span style="font-size:13px; font-weight:600; color:var(--slate-400);">Units</span></div>
+        <div style="font-size:11px; color:var(--slate-400);">Allocated to agents (500-packs)</div>
+      </div>
+
+      <div class="panel" style="padding:16px;">
+        <div style="font-size:12px; font-weight:700; color:var(--slate-500); text-transform:uppercase;">Showroom Distributed</div>
+        <div style="font-size:24px; font-weight:800; color:#059669; margin:6px 0 2px;">${distributedStock} <span style="font-size:13px; font-weight:600; color:var(--slate-400);">Units</span></div>
+        <div style="font-size:11px; color:var(--slate-400);">Delivered to dealerships (100-packs)</div>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar-row" style="margin-bottom:16px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-weight:700; font-size:14px; color:#0f172a;">3-Level Inventory Hierarchy</span>
+        <span class="badge badge-active" style="font-size:10px;">CENTRAL ➔ FIELD AGENT ➔ SHOWROOM</span>
+      </div>
+      <div class="toolbar-actions" style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn secondary" id="btn-sales-distribute" style="background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8; font-weight:700;">
+          🏢 Distribute Agent Stock to Showroom
+        </button>
+        <button class="btn primary" id="btn-sales-allocate" style="font-weight:700;">
+          📦 Allocate Stock to Agent (500 QRs)
+        </button>
+        <button class="btn secondary" id="btn-sales-onboard">
+          ＋ Onboard Sales Agent
+        </button>
+      </div>
+    </div>
+
+    <!-- SALES AGENTS TABLE -->
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h3>Field Sales Team Network</h3>
+          <p>Supervise regional sales agents authorized to hold batch inventory and provision authorized dealership networks.</p>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Sales Agent</th>
+              <th>Territory</th>
+              <th>Contact Phone</th>
+              <th>In-Hand Stock</th>
+              <th>Distributed to Showrooms</th>
+              <th>Total Assigned</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${agents.length > 0 ? agents.map(a => `
+              <tr>
+                <td>
+                  <div style="font-weight:700; color:#0f172a;">${esc(a.name)}</div>
+                  <div style="font-size:11px; color:var(--slate-500);">${esc(a.email)}</div>
+                </td>
+                <td><span class="bihar-state-badge" style="font-size:10.5px;">${esc(a.territory || 'Bihar Region')}</span></td>
+                <td><code class="mono" style="font-size:12px;">${esc(a.phone || '—')}</code></td>
+                <td><b style="color:#d97706; font-size:14px;">${Number(a.inHandCount) || 0}</b> <span style="font-size:11px; color:var(--slate-400);">Units</span></td>
+                <td><b style="color:#059669; font-size:14px;">${Number(a.distributedCount) || 0}</b> <span style="font-size:11px; color:var(--slate-400);">Units</span></td>
+                <td><b>${(Number(a.inHandCount) || 0) + (Number(a.distributedCount) || 0)}</b></td>
+                <td style="text-align:right;">
+                  <button class="btn secondary tiny btn-alloc-agent" data-agent-id="${esc(a.id)}" data-agent-name="${esc(a.name)}" style="margin-right:6px;">
+                    + Allocate QRs
+                  </button>
+                  <button class="btn secondary tiny btn-dist-agent" data-agent-id="${esc(a.id)}" data-agent-name="${esc(a.name)}" style="background:#f0fdf4; border-color:#bbf7d0; color:#15803d;">
+                    Distribute
+                  </button>
+                </td>
+              </tr>
+            `).join('') : `
+              <tr><td colspan="7" style="text-align:center; padding:30px; color:var(--slate-400);">No sales executives registered yet. Click "+ Onboard Sales Agent" to create Vikrant, Arun, or other field team members.</td></tr>
+            `}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  `;
+
+  // Attach event handlers
+  container.querySelector('#btn-sales-onboard')?.addEventListener('click', () => onboardSalesAgentModal());
+  container.querySelector('#btn-sales-allocate')?.addEventListener('click', () => allocateStockModal(agents, centralStock));
+  container.querySelector('#btn-sales-distribute')?.addEventListener('click', () => distributeStockModal(agents, showrooms.items || []));
+
+  container.querySelectorAll('.btn-alloc-agent').forEach(b => {
+    b.addEventListener('click', () => {
+      const aid = b.getAttribute('data-agent-id');
+      allocateStockModal(agents, centralStock, aid);
+    });
+  });
+
+  container.querySelectorAll('.btn-dist-agent').forEach(b => {
+    b.addEventListener('click', () => {
+      const aid = b.getAttribute('data-agent-id');
+      distributeStockModal(agents, showrooms.items || [], aid);
+    });
+  });
+}
+
+function onboardSalesAgentModal() {
+  const root = document.querySelector('#modal-root');
+  root.innerHTML = `
+    <div class="modal-backdrop">
+      <section class="modal-card" style="max-width:480px;">
+        <button class="modal-close" data-close>×</button>
+        <span class="eyebrow" style="color:#2563eb;">FIELD SALES MANAGEMENT</span>
+        <h2>Onboard Field Sales Agent</h2>
+        <p class="muted">Register a field executive authorized to receive sequential QR allocations and distribute stock to showrooms.</p>
+
+        <form id="agent-form">
+          <label>
+            Full Name *
+            <input name="name" placeholder="e.g. Vikrant Kumar, Arun Sharma" required maxlength="80">
+          </label>
+          <label>
+            Mobile Phone Number *
+            <input name="phone" placeholder="e.g. 9876543210" required maxlength="15">
+          </label>
+          <label>
+            Email Address (Optional)
+            <input name="email" type="email" placeholder="e.g. vikrant@smartoqr.in" maxlength="100">
+          </label>
+          <label>
+            Assigned Territory / Region *
+            <input name="territory" value="Patna & Nalanda Division" required maxlength="80">
+          </label>
+          <div id="agent-error" class="form-error"></div>
+          <div class="modal-actions" style="margin-top:16px;">
+            <button class="btn secondary" type="button" data-close>Cancel</button>
+            <button class="btn primary" type="submit">Create Sales Agent Account →</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  `;
+
+  root.querySelectorAll('[data-close]').forEach(b => b.onclick = () => root.innerHTML = '');
+  root.querySelector('.modal-backdrop').onclick = (e) => {
+    if (e.target.classList.contains('modal-backdrop')) root.innerHTML = '';
+  };
+
+  root.querySelector('#agent-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const err = root.querySelector('#agent-error');
+    err.textContent = '';
+    try {
+      await post('/api/sales/agents', {
+        name: fd.get('name'),
+        phone: fd.get('phone'),
+        email: fd.get('email'),
+        territory: fd.get('territory')
+      });
+      root.innerHTML = '';
+      toast(`✓ Sales Agent ${fd.get('name')} onboarded successfully!`, 'success');
+      salesPage();
+    } catch (x) {
+      err.textContent = x.message;
+    }
+  };
+}
+
+function allocateStockModal(agents, centralStockCount, presetAgentId = '') {
+  const root = document.querySelector('#modal-root');
+  root.innerHTML = `
+    <div class="modal-backdrop">
+      <section class="modal-card" style="max-width:500px;">
+        <button class="modal-close" data-close>×</button>
+        <span class="eyebrow" style="color:#2563eb;">CENTRAL STOCK ➔ FIELD AGENT</span>
+        <h2>Allocate Stock to Sales Executive</h2>
+        <p class="muted">Draws contiguous sequential QR decals from Central Stock and assigns them directly to the chosen sales executive (e.g. Vikrant 500 QRs).</p>
+
+        <form id="alloc-form">
+          <label>
+            Select Field Sales Executive *
+            <select name="agentId" required>
+              <option value="">-- Choose Sales Agent --</option>
+              ${agents.map(a => `
+                <option value="${esc(a.id)}" ${presetAgentId === a.id ? 'selected' : ''}>
+                  ${esc(a.name)} (${esc(a.territory || 'Bihar')}) • Current in-hand: ${a.inHandCount || 0}
+                </option>
+              `).join('')}
+            </select>
+          </label>
+
+          <label>
+            Quantity to Allocate *
+            <input name="quantity" type="number" min="10" max="2000" step="10" value="500" required>
+            <small style="font-size:11px; color:var(--slate-400); display:block; margin-top:4px;">
+              Default: 500 QRs. Available Central Stock: <b>${centralStockCount}</b> units.
+            </small>
+          </label>
+
+          <label>
+            Allocation Notes / Purpose
+            <input name="notes" placeholder="e.g. Initial Patna showroom onboarding batch of 500 QRs">
+          </label>
+
+          <div id="alloc-error" class="form-error"></div>
+          <div class="modal-actions" style="margin-top:16px;">
+            <button class="btn secondary" type="button" data-close>Cancel</button>
+            <button class="btn primary" type="submit">Allocate Sequential Sequence →</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  `;
+
+  root.querySelectorAll('[data-close]').forEach(b => b.onclick = () => root.innerHTML = '');
+  root.querySelector('.modal-backdrop').onclick = (e) => {
+    if (e.target.classList.contains('modal-backdrop')) root.innerHTML = '';
+  };
+
+  root.querySelector('#alloc-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const err = root.querySelector('#alloc-error');
+    err.textContent = '';
+    try {
+      const res = await post('/api/sales/allocate', {
+        agentId: fd.get('agentId'),
+        quantity: Number(fd.get('quantity')),
+        notes: fd.get('notes')
+      });
+      root.innerHTML = '';
+      toast(`✓ Successfully allocated ${res.allocatedCount} QRs (${res.seriesStart} ➔ ${res.seriesEnd}) to agent!`, 'success');
+      salesPage();
+    } catch (x) {
+      err.textContent = x.message;
+    }
+  };
+}
+
+function distributeStockModal(agents, showrooms, presetAgentId = '') {
+  const root = document.querySelector('#modal-root');
+  root.innerHTML = `
+    <div class="modal-backdrop">
+      <section class="modal-card" style="max-width:520px;">
+        <button class="modal-close" data-close>×</button>
+        <span class="eyebrow" style="color:#059669;">FIELD AGENT ➔ SHOWROOM STOCK</span>
+        <h2>Distribute Stock to Showroom</h2>
+        <p class="muted">Sub-distribute inventory from field executive stock to an authorized dealer showroom (e.g. 100 QRs per showroom pack).</p>
+
+        <form id="dist-form">
+          <label>
+            Source Field Sales Agent *
+            <select name="agentId" required>
+              <option value="">-- Choose Sales Agent with In-Hand Stock --</option>
+              ${agents.map(a => `
+                <option value="${esc(a.id)}" ${presetAgentId === a.id ? 'selected' : ''}>
+                  ${esc(a.name)} • In-Hand Stock: ${a.inHandCount || 0} QRs
+                </option>
+              `).join('')}
+            </select>
+          </label>
+
+          <label>
+            Destination Authorized Showroom *
+            <select name="showroomId" required>
+              <option value="">-- Choose Showroom --</option>
+              ${showrooms.map(s => `
+                <option value="${esc(s.id)}">
+                  ${esc(s.name)} (${esc(s.city)}) • Code: ${esc(s.code)}
+                </option>
+              `).join('')}
+            </select>
+          </label>
+
+          <label>
+            Quantity to Transfer (Showroom Batch Pack) *
+            <input name="quantity" type="number" min="10" max="500" step="10" value="100" required>
+            <small style="font-size:11px; color:var(--slate-400); display:block; margin-top:4px;">
+              Standard showroom delivery pack: 100 QRs per batch.
+            </small>
+          </label>
+
+          <label>
+            Handover Note / Receipt No.
+            <input name="notes" placeholder="e.g. Handed over to Floor Manager Amit Sinha (100 QRs pack)">
+          </label>
+
+          <div id="dist-error" class="form-error"></div>
+          <div class="modal-actions" style="margin-top:16px;">
+            <button class="btn secondary" type="button" data-close>Cancel</button>
+            <button class="btn primary" type="submit">Complete Showroom Transfer →</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  `;
+
+  root.querySelectorAll('[data-close]').forEach(b => b.onclick = () => root.innerHTML = '');
+  root.querySelector('.modal-backdrop').onclick = (e) => {
+    if (e.target.classList.contains('modal-backdrop')) root.innerHTML = '';
+  };
+
+  root.querySelector('#dist-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const err = root.querySelector('#dist-error');
+    err.textContent = '';
+    try {
+      const res = await post('/api/sales/distribute-to-showroom', {
+        agentId: fd.get('agentId'),
+        showroomId: fd.get('showroomId'),
+        quantity: Number(fd.get('quantity')),
+        notes: fd.get('notes')
+      });
+      root.innerHTML = '';
+      toast(`✓ Distributed ${res.distributedCount} QRs (${res.seriesStart} ➔ ${res.seriesEnd}) to showroom stock!`, 'success');
+      salesPage();
+    } catch (x) {
+      err.textContent = x.message;
+    }
+  };
+}
+
+/* ==========================================================================
+   School Child Safety Badges & Partner Network
+   ========================================================================== */
+async function schoolsPage() {
+  if (!state.schoolTab) state.schoolTab = 'schools';
+
+  const [rawSchools, rawChildren, qrs] = await Promise.all([
+    api('/api/schools').catch(() => ({ items: [] })),
+    api('/api/schools/children').catch(() => ({ items: [] })),
+    api('/api/qrs').catch(() => ({ items: [] }))
+  ]);
+
+  const schools = Array.isArray(rawSchools) ? rawSchools : (rawSchools.items || []);
+  const children = Array.isArray(rawChildren) ? rawChildren : (rawChildren.items || []);
+
+  const schoolStock = qrs.items?.filter(x => x.category === 'SCHOOL' && x.status === 'CENTRAL_STOCK')?.length || 0;
+
+  const container = document.querySelector('.page-wrap');
+  container.innerHTML = `
+    <!-- KPI METRICS -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px; margin-bottom:20px;">
+      <div class="panel" style="padding:16px;">
+        <div style="font-size:12px; font-weight:700; color:var(--slate-500); text-transform:uppercase;">Partner Schools</div>
+        <div style="font-size:24px; font-weight:800; color:#0284c7; margin:6px 0 2px;">${schools.length} <span style="font-size:13px; font-weight:600; color:var(--slate-400);">Schools</span></div>
+        <div style="font-size:11px; color:var(--slate-400);">Kindergarten to Class 3 safe institutions</div>
+      </div>
+
+      <div class="panel" style="padding:16px;">
+        <div style="font-size:12px; font-weight:700; color:var(--slate-500); text-transform:uppercase;">Active Child Safety Badges</div>
+        <div style="font-size:24px; font-weight:800; color:#059669; margin:6px 0 2px;">${children.length} <span style="font-size:13px; font-weight:600; color:var(--slate-400);">Students</span></div>
+        <div style="font-size:11px; color:var(--slate-400);">Protected with verified SOS QR tags</div>
+      </div>
+
+      <div class="panel" style="padding:16px;">
+        <div style="font-size:12px; font-weight:700; color:var(--slate-500); text-transform:uppercase;">School QR Stock</div>
+        <div style="font-size:24px; font-weight:800; color:#d97706; margin:6px 0 2px;">${schoolStock} <span style="font-size:13px; font-weight:600; color:var(--slate-400);">Badges</span></div>
+        <div style="font-size:11px; color:var(--slate-400);">Ready for acrylic badge printing</div>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar-row" style="margin-bottom:16px;">
+      <div class="filter-chips">
+        <button class="chip ${state.schoolTab === 'schools' ? 'active' : ''}" data-sch-tab="schools">
+          🏫 Partner Schools (${schools.length})
+        </button>
+        <button class="chip ${state.schoolTab === 'children' ? 'active' : ''}" data-sch-tab="children">
+          🎒 Enrolled Children & Badges (${children.length})
+        </button>
+      </div>
+
+      <div class="toolbar-actions" style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn secondary" id="btn-gen-school-qr" style="background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8; font-weight:700;">
+          🖨️ Generate School QR Batch (Pure QR)
+        </button>
+        <button class="btn primary" id="btn-register-child" style="font-weight:700;">
+          🎒 + Register Child & Bind Badge
+        </button>
+        <button class="btn secondary" id="btn-onboard-school">
+          ＋ Onboard Partner School
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB CONTENT -->
+    <section class="panel">
+      ${state.schoolTab === 'schools' ? `
+        <div class="panel-heading">
+          <div>
+            <h3>Partner Schools Directory</h3>
+            <p>Schools participating in the SmartO Child Safety Badge program. Revenue model: ₹500 fee (₹200 to school, ₹300 platform).</p>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>School Name & Code</th>
+                <th>Operating City</th>
+                <th>Principal / Coordinator</th>
+                <th>Emergency Helpdesk</th>
+                <th>Enrolled Badges</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${schools.length > 0 ? schools.map(s => `
+                <tr>
+                  <td>
+                    <div style="font-weight:700; color:#0f172a;">${esc(s.name)}</div>
+                    <code class="mono" style="font-size:11px; color:#2563eb;">${esc(s.code)}</code>
+                  </td>
+                  <td>${esc(s.city || 'Patna')}</td>
+                  <td>
+                    <div style="font-weight:600;">${esc(s.principal_name || '—')}</div>
+                    <div style="font-size:11px; color:var(--slate-500);">${esc(s.contact_phone || '—')}</div>
+                  </td>
+                  <td><code class="mono" style="font-size:12px; color:#dc2626;">${esc(s.emergency_phone || s.contact_phone || '—')}</code></td>
+                  <td><b style="color:#059669; font-size:14px;">${Number(s.child_count) || 0}</b></td>
+                  <td style="text-align:right;">
+                    <button class="btn secondary tiny btn-add-child-to-school" data-school-id="${esc(s.id)}" data-school-name="${esc(s.name)}">
+                      + Register Student
+                    </button>
+                  </td>
+                </tr>
+              `).join('') : `
+                <tr><td colspan="6" style="text-align:center; padding:30px; color:var(--slate-400);">No schools onboarded yet. Click "+ Onboard Partner School" to add your first institution.</td></tr>
+              `}
+            </tbody>
+          </table>
+        </div>
+      ` : `
+        <div class="panel-heading">
+          <div>
+            <h3>Enrolled Children & Safety Badges</h3>
+            <p>Full student directory with parents' contact details and child safety acrylic badge serial linkages.</p>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Child Name</th>
+                <th>School & Class</th>
+                <th>Blood Group</th>
+                <th>Parent Contacts</th>
+                <th>Badge QR Serial</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${children.length > 0 ? children.map(c => `
+                <tr>
+                  <td>
+                    <div style="font-weight:700; color:#0f172a; font-size:13.5px;">${esc(c.child_name)}</div>
+                    <div style="font-size:11px; color:var(--slate-400);">${esc(c.address || '')}</div>
+                  </td>
+                  <td>
+                    <div style="font-weight:600;">${esc(c.school_name)}</div>
+                    <div style="font-size:11.5px; color:#2563eb;">${esc(c.class_sec || '—')} ${c.roll_no ? `(Roll: ${esc(c.roll_no)})` : ''}</div>
+                  </td>
+                  <td><span class="badge" style="background:#fee2e2; color:#b91c1c; font-weight:700;">${esc(c.blood_group || '—')}</span></td>
+                  <td>
+                    <div><b>${esc(c.parent_name || 'Parent')}</b>: <code class="mono" style="font-size:11px;">${esc(c.parent_phone_1)}</code></div>
+                    ${c.parent_phone_2 ? `<div style="font-size:11px; color:var(--slate-500);">Alt: <code class="mono">${esc(c.parent_phone_2)}</code></div>` : ''}
+                  </td>
+                  <td><b class="mono" style="color:#059669; font-size:13px;">${esc(c.qr_id)}</b></td>
+                  <td style="text-align:right;">
+                    <button class="btn secondary tiny btn-view-child-badge" data-qr-id="${esc(c.qr_id)}" data-token="${esc(c.public_token)}" data-child="${esc(c.child_name)}" data-school="${esc(c.school_name)}" style="margin-right:6px;">
+                      👁️ Print Badge QR
+                    </button>
+                    <a class="btn secondary tiny" href="/scan/${encodeURIComponent(c.public_token)}" target="_blank" style="text-decoration:none;">
+                      Test Scan ↗
+                    </a>
+                  </td>
+                </tr>
+              `).join('') : `
+                <tr><td colspan="6" style="text-align:center; padding:30px; color:var(--slate-400);">No children registered yet. Click "+ Register Child & Bind Badge".</td></tr>
+              `}
+            </tbody>
+          </table>
+        </div>
+      `}
+    </section>
+  `;
+
+  // Attach tab events
+  container.querySelectorAll('[data-sch-tab]').forEach(b => {
+    b.onclick = () => {
+      state.schoolTab = b.dataset.schTab;
+      schoolsPage();
+    };
+  });
+
+  container.querySelector('#btn-onboard-school')?.addEventListener('click', () => onboardSchoolModal());
+  container.querySelector('#btn-register-child')?.addEventListener('click', () => registerChildModal(schools, qrs.items || []));
+  container.querySelector('#btn-gen-school-qr')?.addEventListener('click', () => batchModal('SCHOOL'));
+
+  container.querySelectorAll('.btn-add-child-to-school').forEach(b => {
+    b.addEventListener('click', () => {
+      const sid = b.getAttribute('data-school-id');
+      registerChildModal(schools, qrs.items || [], sid);
+    });
+  });
+
+  container.querySelectorAll('.btn-view-child-badge').forEach(b => {
+    b.addEventListener('click', () => {
+      const qid = b.getAttribute('data-qr-id');
+      const tok = b.getAttribute('data-token');
+      const cname = b.getAttribute('data-child');
+      const sname = b.getAttribute('data-school');
+      showChildBadgeModal(qid, tok, cname, sname);
+    });
+  });
+}
+
+function onboardSchoolModal() {
+  const root = document.querySelector('#modal-root');
+  root.innerHTML = `
+    <div class="modal-backdrop">
+      <section class="modal-card" style="max-width:520px;">
+        <button class="modal-close" data-close>×</button>
+        <span class="eyebrow" style="color:#0284c7;">CHILD SAFETY ALLIANCE</span>
+        <h2>Onboard Partner School</h2>
+        <p class="muted">Add a school to the SmartO Child Safety ecosystem. Acrylic badges with cartoon cutouts and SOS scanning will be provisioned.</p>
+
+        <form id="school-form">
+          <label>
+            School Full Name *
+            <input name="name" placeholder="e.g. Delhi Public School (Patna), St. Michael's High School" required maxlength="120">
+          </label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <label>
+              School Unique Code *
+              <input name="code" placeholder="e.g. DPS-PATNA, STM-PAT" required maxlength="20" style="text-transform:uppercase; font-family:var(--font-mono); font-weight:700;">
+            </label>
+            <label>
+              City *
+              <input name="city" value="Patna" required maxlength="50">
+            </label>
+          </div>
+          <label>
+            Campus Address
+            <textarea name="address" rows="2" placeholder="Full school campus address, landmarks..." style="resize:vertical;"></textarea>
+          </label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <label>
+              Principal / Head In-Charge
+              <input name="principalName" placeholder="e.g. Dr. Rajesh Verma" maxlength="80">
+            </label>
+            <label>
+              Coordinator Mobile Phone *
+              <input name="contactPhone" placeholder="e.g. 9876543210" required maxlength="15">
+            </label>
+          </div>
+          <label>
+            School Emergency Helpdesk Phone
+            <input name="emergencyPhone" placeholder="e.g. 0612-2580000 or emergency mobile" maxlength="20">
+            <small style="font-size:11px; color:var(--slate-400); display:block; margin-top:2px;">
+              Will be shown as "Call School Helpdesk" when child badge is scanned by public.
+            </small>
+          </label>
+          <div id="school-error" class="form-error"></div>
+          <div class="modal-actions" style="margin-top:16px;">
+            <button class="btn secondary" type="button" data-close>Cancel</button>
+            <button class="btn primary" type="submit">Onboard School & Enable Badges →</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  `;
+
+  root.querySelectorAll('[data-close]').forEach(b => b.onclick = () => root.innerHTML = '');
+  root.querySelector('.modal-backdrop').onclick = (e) => {
+    if (e.target.classList.contains('modal-backdrop')) root.innerHTML = '';
+  };
+
+  root.querySelector('#school-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const err = root.querySelector('#school-error');
+    err.textContent = '';
+    try {
+      await post('/api/schools', {
+        name: fd.get('name'),
+        code: fd.get('code'),
+        city: fd.get('city'),
+        address: fd.get('address'),
+        principalName: fd.get('principalName'),
+        contactPhone: fd.get('contactPhone'),
+        emergencyPhone: fd.get('emergencyPhone')
+      });
+      root.innerHTML = '';
+      toast(`✓ Partner school ${fd.get('name')} onboarded successfully!`, 'success');
+      state.schoolTab = 'schools';
+      schoolsPage();
+    } catch (x) {
+      err.textContent = x.message;
+    }
+  };
+}
+
+function registerChildModal(schools, qrs, presetSchoolId = '') {
+  const root = document.querySelector('#modal-root');
+
+  const availableSchoolQrs = qrs.filter(q => (q.category === 'SCHOOL' || !q.vehicle_id) && q.status !== 'ACTIVE');
+
+  root.innerHTML = `
+    <div class="modal-backdrop">
+      <section class="modal-card" style="max-width:560px; max-height:92vh; overflow-y:auto;">
+        <button class="modal-close" data-close>×</button>
+        <span class="eyebrow" style="color:#059669;">CHILD SAFETY ENROLLMENT</span>
+        <h2>Register Child & Link Badge</h2>
+        <p class="muted">Links a child profile with parent emergency numbers and serial QR code for acrylic cartoon badge.</p>
+
+        <form id="child-form">
+          <label>
+            Select Partner School *
+            <select name="schoolId" required>
+              <option value="">-- Choose Partner School --</option>
+              ${schools.map(s => `
+                <option value="${esc(s.id)}" ${presetSchoolId === s.id ? 'selected' : ''}>
+                  ${esc(s.name)} (${esc(s.city)})
+                </option>
+              `).join('')}
+            </select>
+          </label>
+
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin:10px 0;">
+            <div style="font-weight:700; font-size:12px; color:#0f172a; margin-bottom:8px; text-transform:uppercase;">Student Information</div>
+            <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:10px; margin-bottom:10px;">
+              <label style="margin:0;">
+                <span style="font-size:11.5px;">Child Full Name *</span>
+                <input name="childName" placeholder="e.g. Aarav Sharma" required maxlength="80">
+              </label>
+              <label style="margin:0;">
+                <span style="font-size:11.5px;">Class & Section *</span>
+                <input name="classSec" placeholder="e.g. Class 2 - B, KG - Lotus" required maxlength="30">
+              </label>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <label style="margin:0;">
+                <span style="font-size:11.5px;">Roll Number</span>
+                <input name="rollNo" placeholder="e.g. 14" maxlength="20">
+              </label>
+              <label style="margin:0;">
+                <span style="font-size:11.5px;">Blood Group</span>
+                <select name="bloodGroup">
+                  <option value="B+">B+</option>
+                  <option value="O+">O+</option>
+                  <option value="A+">A+</option>
+                  <option value="AB+">AB+</option>
+                  <option value="B-">B-</option>
+                  <option value="O-">O-</option>
+                  <option value="A-">A-</option>
+                  <option value="AB-">AB-</option>
+                  <option value="Unknown">Unknown</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:12px; margin-bottom:10px;">
+            <div style="font-weight:700; font-size:12px; color:#c2410c; margin-bottom:8px; text-transform:uppercase;">Parent Contacts (Immediate SOS)</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px;">
+              <label style="margin:0;">
+                <span style="font-size:11.5px; color:#431407;">Parent Name *</span>
+                <input name="parentName" placeholder="e.g. Alok Sharma" required maxlength="80">
+              </label>
+              <label style="margin:0;">
+                <span style="font-size:11.5px; color:#431407;">Primary Phone (Father/Mother) *</span>
+                <input name="parentPhone1" placeholder="e.g. 9811122334" required maxlength="15">
+              </label>
+            </div>
+            <label style="margin:0;">
+              <span style="font-size:11.5px; color:#431407;">Alternate Emergency Phone (Mother / Guardian)</span>
+              <input name="parentPhone2" placeholder="e.g. 9822233445" maxlength="15">
+            </label>
+          </div>
+
+          <label>
+            Physical Residential Address
+            <input name="address" placeholder="e.g. Kankarbagh, Patna, Bihar" maxlength="120">
+          </label>
+
+          <label>
+            Acrylic Safety Badge QR Serial *
+            ${availableSchoolQrs.length > 0 ? `
+              <select name="qrCode" required>
+                <option value="">-- Choose QR Badge Serial --</option>
+                ${availableSchoolQrs.map(q => `
+                  <option value="${esc(q.qr_id)}">
+                    ${esc(q.qr_id)} (${esc(q.category || 'SCHOOL')}) • Token: ${esc(q.public_token.slice(0, 10))}...
+                  </option>
+                `).join('')}
+              </select>
+            ` : `
+              <input name="qrCode" placeholder="e.g. SCHBR-00000001" required style="font-family:var(--font-mono); font-weight:700;">
+            `}
+            <small style="font-size:11px; color:var(--slate-400); display:block; margin-top:2px;">
+              If not pre-printed, enter an available QR serial or select from school batch.
+            </small>
+          </label>
+
+          <div id="child-error" class="form-error"></div>
+          <div class="modal-actions" style="margin-top:16px;">
+            <button class="btn secondary" type="button" data-close>Cancel</button>
+            <button class="btn primary" type="submit">Activate Safety Badge & Save Profile →</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  `;
+
+  root.querySelectorAll('[data-close]').forEach(b => b.onclick = () => root.innerHTML = '');
+  root.querySelector('.modal-backdrop').onclick = (e) => {
+    if (e.target.classList.contains('modal-backdrop')) root.innerHTML = '';
+  };
+
+  root.querySelector('#child-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const err = root.querySelector('#child-error');
+    err.textContent = '';
+    try {
+      const res = await post('/api/schools/register-child', {
+        schoolId: fd.get('schoolId'),
+        childName: fd.get('childName'),
+        classSec: fd.get('classSec'),
+        rollNo: fd.get('rollNo'),
+        bloodGroup: fd.get('bloodGroup'),
+        parentName: fd.get('parentName'),
+        parentPhone1: fd.get('parentPhone1'),
+        parentPhone2: fd.get('parentPhone2'),
+        address: fd.get('address'),
+        qrCode: fd.get('qrCode')
+      });
+      root.innerHTML = '';
+      toast(`✓ Child safety badge ${res.qrId} bound to ${res.childName} (${res.schoolName})!`, 'success');
+      state.schoolTab = 'children';
+      schoolsPage();
+    } catch (x) {
+      err.textContent = x.message;
+    }
+  };
+}
+
+function showChildBadgeModal(qrId, publicToken, childName, schoolName) {
+  const root = document.querySelector('#modal-root');
+  const scanUrl = `${location.origin}/scan/${encodeURIComponent(publicToken)}`;
+  const badgeSvg = generateSchoolBadgeSvg({ qrId, scanUrl, childName, schoolName, size: 380 });
+
+  root.innerHTML = `
+    <div class="modal-backdrop">
+      <section class="modal-card" style="max-width:500px; text-align:center;">
+        <button class="modal-close" data-close>×</button>
+        <span class="eyebrow" style="color:#059669;">STANDALONE ACRYLIC BADGE SPECIFICATION</span>
+        <h2>Child Safety Badge Vector</h2>
+        <p class="muted">Customized cartoon panda & school safety badge for printing on acrylic/plastic tags (Kindergarten to Class 3).</p>
+
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; padding:18px; margin:14px 0; display:flex; justify-content:center;">
+          ${badgeSvg}
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:12px; margin-top:16px;">
+          <button class="btn secondary" data-close>Close</button>
+          <button class="btn secondary" id="download-badge-svg">
+            ⬇️ Download Badge SVG
+          </button>
+          <button class="btn primary" id="print-badge-btn">
+            🖨️ Print Badge
+          </button>
+        </div>
+      </section>
+    </div>
+  `;
+
+  root.querySelectorAll('[data-close]').forEach(b => b.onclick = () => root.innerHTML = '');
+  root.querySelector('.modal-backdrop').onclick = (e) => {
+    if (e.target.classList.contains('modal-backdrop')) root.innerHTML = '';
+  };
+
+  root.querySelector('#download-badge-svg').onclick = () => {
+    const blob = new Blob([badgeSvg], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `SmartO_Child_Badge_${qrId}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  root.querySelector('#print-badge-btn').onclick = () => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Print Child Safety Badge - ${esc(qrId)}</title>
+          <style>
+            body { margin: 0; padding: 40px; display: flex; justify-content: center; align-items: center; background: white; font-family: sans-serif; }
+            svg { max-width: 400px; height: auto; }
+          </style>
+        </head>
+        <body>
+          ${badgeSvg}
+          <script>window.onload = () => { window.print(); };</script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+}
+
 async function messagePage() {
   const m = await api('/api/messages');
   setAlertBadge(m.items.filter(x => x.status === 'NEW' || x.status === 'ACKNOWLEDGED').length);
@@ -3431,76 +4401,27 @@ function checkoutStoreModal(sku, name, price) {
 
   root.innerHTML = `
     <div class="modal-backdrop">
-      <section class="modal-card" style="max-width:540px; max-height:92vh; overflow-y:auto;">
+      <section class="modal-card" style="max-width:520px; text-align:center;">
         <button class="modal-close" data-close>×</button>
-        <span class="eyebrow" style="color:#2563eb;">SECURE DOORSTEP CHECKOUT</span>
-        <h2>Order SmartO Decal Pack</h2>
-        <p class="muted">Ordering <b>${esc(name)}</b> for <b>₹${price}</b> (FREE Shipping).</p>
+        <div style="width:64px; height:64px; border-radius:50%; background:#eff6ff; border:2px solid #93c5fd; color:#2563eb; font-size:28px; display:grid; place-items:center; margin:0 auto 16px;">
+          🏢
+        </div>
+        <span class="eyebrow" style="color:#2563eb;">AUTHORIZED DISTRIBUTION ONLY</span>
+        <h2 style="margin:6px 0 10px;">Retail Ordering Restricted</h2>
+        <p class="muted" style="line-height:1.6; font-size:13.5px; margin-bottom:18px;">
+          SmartO Holographic Vehicle Decals and Child Safety Badges are distributed exclusively through authorized dealership showrooms and verified partner school safety programs.
+        </p>
 
-        <form id="store-checkout-form">
-          <input type="hidden" name="productSku" value="${esc(sku)}">
-          <input type="hidden" name="price" value="${price}">
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:16px; text-align:left; margin-bottom:20px;">
+          <div style="font-weight:700; font-size:12.5px; color:#0f172a; margin-bottom:6px;">How to Get SmartO Protection:</div>
+          <ul style="margin:0; padding-left:18px; font-size:12.5px; color:#475569; line-height:1.6;">
+            <li><b>Vehicles:</b> Installed directly at your authorized automobile dealer showroom at the time of delivery (₹499 Package with GST).</li>
+            <li><b>School Students:</b> Distributed through participating schools via our Child Safety Badge Program.</li>
+            <li><b>Dealership & School Partnerships:</b> Contact SmartO Central Operations Team, Patna.</li>
+          </ul>
+        </div>
 
-          <label>
-            Full Delivery Name
-            <input name="customerName" value="${esc(state.user?.name || '')}" placeholder="e.g. Rahul Sharma" required maxlength="80">
-          </label>
-
-          <label>
-            Mobile Phone Number (For SMS OTP & Courier Updates)
-            <input name="customerPhone" type="tel" value="${esc(state.user?.phone || '')}" placeholder="e.g. +91 98765 43210" required maxlength="20">
-          </label>
-
-          <label>
-            Delivery Street Address
-            <textarea name="address" rows="2" placeholder="House/Flat No., Street, Landmark..." required></textarea>
-          </label>
-
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <label>
-              City / District
-              <input name="city" value="Patna" required placeholder="e.g. Patna, Muzaffarpur">
-            </label>
-            <label>
-              State
-              <select name="state">
-                <option value="Bihar" selected>Bihar</option>
-                <option value="Uttar Pradesh">Uttar Pradesh</option>
-                <option value="Jharkhand">Jharkhand</option>
-                <option value="Delhi NCR">Delhi NCR</option>
-                <option value="West Bengal">West Bengal</option>
-              </select>
-            </label>
-          </div>
-
-          <label>
-            Postal PIN Code
-            <input name="pincode" maxlength="6" placeholder="e.g. 800001" required style="font-family:var(--font-mono); font-weight:700;">
-          </label>
-
-          <!-- No payment provider is connected yet. -->
-          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin:16px 0;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <b style="font-size:12.5px; color:#0f172a;">Order request only</b>
-              <span class="badge badge-pending-activation" style="font-size:10px;">PAYMENT PENDING</span>
-            </div>
-            <p style="font-size:12px; color:#475569; line-height:1.5; margin:0 0 10px;">Submitting creates a draft. No payment is collected and no stock or courier is assigned until an administrator confirms it.</p>
-
-            <div style="display:flex; justify-content:space-between; font-size:12.5px; color:#475569; padding-top:8px; border-top:1px dashed #cbd5e1;">
-              <span>Draft order amount:</span>
-              <b style="color:#0f172a; font-size:14px;">₹${price}</b>
-            </div>
-          </div>
-
-          <div id="checkout-error" class="form-error"></div>
-
-          <div class="modal-actions">
-            <button class="btn secondary" type="button" data-close>Cancel</button>
-            <button class="btn primary" type="submit" id="btn-submit-order" style="padding:11px 20px;">
-              Create Draft Order →
-            </button>
-          </div>
-        </form>
+        <button class="btn primary full" data-close style="padding:12px;">Understand & Close</button>
       </section>
     </div>
   `;
@@ -3508,70 +4429,6 @@ function checkoutStoreModal(sku, name, price) {
   root.querySelectorAll('[data-close]').forEach(b => b.onclick = () => root.innerHTML = '');
   root.querySelector('.modal-backdrop').onclick = (e) => {
     if (e.target.classList.contains('modal-backdrop')) root.innerHTML = '';
-  };
-
-  root.querySelector('#store-checkout-form').onsubmit = async (e) => {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    const errBox = root.querySelector('#checkout-error');
-    errBox.textContent = '';
-    const btn = root.querySelector('#btn-submit-order');
-    btn.disabled = true;
-    btn.textContent = 'Creating order draft...';
-
-    try {
-      const res = await post('/api/store/order', {
-        productSku: fd.get('productSku'),
-        customerName: fd.get('customerName'),
-        customerPhone: fd.get('customerPhone'),
-        address: fd.get('address'),
-        city: fd.get('city'),
-        state: fd.get('state'),
-        pincode: fd.get('pincode'),
-        quantity: 1
-      });
-
-      // Show Order Success Screen
-      root.innerHTML = `
-        <div class="modal-backdrop">
-          <section class="modal-card" style="max-width:520px; text-align:center;">
-            <button class="modal-close" data-close>×</button>
-            <div style="width:60px; height:60px; border-radius:50%; background:#ecfdf5; border:1.5px solid #a7f3d0; color:#059669; font-size:28px; display:grid; place-items:center; margin:0 auto 14px;">
-              ✓
-            </div>
-            <span class="eyebrow" style="color:#059669;">ORDER DRAFT CREATED</span>
-            <h2>Thank you, ${esc(res.customerName)}!</h2>
-            <p class="muted">Your request is recorded. No payment was collected and no stock or courier has been assigned yet.</p>
-
-            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin:18px 0; text-align:left;">
-              <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12.5px;">
-                <span style="color:#64748b;">Order Reference:</span>
-                <code class="mono" style="font-weight:700;">${esc(res.orderId)}</code>
-              </div>
-              <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12.5px;">
-                <span style="color:#64748b;">Payment status:</span>
-                <code class="mono" style="font-weight:700; color:#d97706;">${esc(res.paymentStatus)}</code>
-              </div>
-              <div style="display:flex; justify-content:space-between; font-size:12.5px;">
-                <span style="color:#64748b;">Order status:</span>
-                <b>${esc(res.orderStatus)}</b>
-              </div>
-            </div>
-
-            <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:14px; margin-bottom:20px; text-align:left; font-size:12px; color:#1e3a8a; line-height:1.5;">
-              <b>Next step:</b> An administrator must confirm payment, allocate inventory, and arrange dispatch before this order can progress.
-            </div>
-
-            <button class="btn primary full" data-close>Done & Return to Store</button>
-          </section>
-        </div>
-      `;
-      root.querySelectorAll('[data-close]').forEach(b => b.onclick = () => root.innerHTML = '');
-    } catch (err) {
-      errBox.textContent = err.message;
-      btn.disabled = false;
-      btn.textContent = 'Create Draft Order →';
-    }
   };
 }
 
@@ -4199,6 +5056,126 @@ async function renderScan() {
     return;
   }
 
+  if (qr.category === 'SCHOOL' && qr.child) {
+    const ch = qr.child;
+    const parentPhone = ch.contacts?.[0]?.phone || '';
+    const cleanParentPhone = parentPhone.replace(/\D/g, '');
+
+    app.innerHTML = `
+      <main class="scan-page">
+        <header class="scan-brand">
+          <div class="brand-svg-wrap">
+            ${smartOLogoSvg({ width: 170, height: 46, mode: 'dark' })}
+          </div>
+          <div class="lang-switch">
+            <button class="lang-btn ${state.lang === 'en' ? 'active' : ''}" data-lang="en">EN</button>
+            <button class="lang-btn ${state.lang === 'hi' ? 'active' : ''}" data-lang="hi">हिंदी</button>
+          </div>
+        </header>
+
+        <div class="scan-container" style="max-width:520px; margin:0 auto; padding:16px;">
+          <section style="background:linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.2) 100%); border:2px solid #10b981; border-radius:24px; padding:24px 20px; text-align:center; box-shadow:0 12px 32px rgba(16, 185, 129, 0.25); margin-bottom:20px;">
+            <div style="font-size:42px; margin-bottom:8px;">🐼🎒</div>
+            <span class="eyebrow" style="color:#10b981; font-weight:800; font-size:12px; letter-spacing:1px;">OFFICIAL CHILD SAFETY SOS BADGE</span>
+            <h1 style="font-size:26px; font-weight:800; color:#ffffff; margin:6px 0;">${esc(ch.name)}</h1>
+            <div style="font-size:14px; font-weight:600; color:#a7f3d0; margin-bottom:12px;">${esc(ch.school)}</div>
+            
+            <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
+              <span class="badge" style="background:rgba(255,255,255,0.1); color:#ffffff; border:1px solid rgba(255,255,255,0.2); font-size:12px; padding:4px 10px;">
+                Class: <b>${esc(ch.classSec || '—')}</b>
+              </span>
+              <span class="badge" style="background:#fee2e2; color:#b91c1c; font-weight:800; font-size:12px; padding:4px 10px;">
+                Blood Group: <b>${esc(ch.bloodGroup || '—')}</b>
+              </span>
+              <span class="verified-shield" style="font-size:11px;">✓ VERIFIED STUDENT ID</span>
+            </div>
+            <div style="font-family:var(--font-mono); font-size:11px; color:#cbd5e1; margin-top:8px;">BADGE SERIAL: ${esc(qr.qrId)}</div>
+          </section>
+
+          <div style="font-weight:800; font-size:13px; color:#ef4444; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+            <span>🚨 IMMEDIATE RESCUE & FAMILY CONTACT</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr; gap:12px; margin-bottom:20px;">
+            ${(ch.contacts || []).map((c, i) => `
+              <a href="tel:${esc(c.phone)}" class="btn" style="background:linear-gradient(135deg, #059669 0%, #10b981 100%); color:#ffffff; text-decoration:none; padding:16px; border-radius:14px; font-weight:800; font-size:15px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 6px 18px rgba(16, 185, 129, 0.35);">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <span style="font-size:22px;">📞</span>
+                  <div style="text-align:left;">
+                    <div>Call ${esc(c.relation || 'Parent')}</div>
+                    <small style="font-size:12px; opacity:0.9; font-weight:500;">Tap to call immediately (${esc(c.phone)})</small>
+                  </div>
+                </div>
+                <span style="font-size:18px;">➔</span>
+              </a>
+            `).join('')}
+
+            <button type="button" class="btn" id="btn-child-share-gps" style="background:linear-gradient(135deg, #15803d 0%, #22c55e 100%); color:#ffffff; border:none; padding:16px; border-radius:14px; font-weight:800; font-size:14.5px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 6px 18px rgba(34, 197, 94, 0.35); cursor:pointer;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:22px;">📍</span>
+                <div style="text-align:left;">
+                  <div>Send Found GPS Location to Parents</div>
+                  <small style="font-size:11.5px; opacity:0.9; font-weight:500;">Auto-fetches current map pin and sends on WhatsApp</small>
+                </div>
+              </div>
+              <span style="font-size:18px;">➔</span>
+            </button>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px;">
+              <a href="tel:1098" class="btn secondary" style="color:#ffffff; background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.2); padding:12px; font-size:12.5px; font-weight:700; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px;">
+                <span>🛡️ Childline 1098</span>
+              </a>
+              <a href="tel:112" class="btn secondary" style="color:#ffffff; background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.2); padding:12px; font-size:12.5px; font-weight:700; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px;">
+                <span>🚨 Police SOS 112</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="scan-privacy-shield" style="margin-top:20px;">
+            <span>🛡️</span>
+            <span>Bihar Child Safety Initiative • SmartO Innovations</span>
+          </div>
+        </div>
+
+        <footer style="max-width:580px; margin:30px auto 0; text-align:center; font-size:10px; color:var(--slate-400); letter-spacing:0.08em;">
+          SMARTO CHILD SAFETY SYSTEM • POWERED BY SMARTO INNOVATIONS
+        </footer>
+      </main>
+    `;
+
+    document.querySelectorAll('[data-lang]').forEach(b => {
+      b.onclick = () => {
+        state.lang = b.dataset.lang;
+        renderScan();
+      };
+    });
+
+    document.querySelector('#btn-child-share-gps')?.addEventListener('click', () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            const mapLink = `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+            const text = `EMERGENCY ALERT: I am near your child ${ch.name} (${ch.school}). Here is my current GPS location: ${mapLink}`;
+            const target = cleanParentPhone ? `https://api.whatsapp.com/send?phone=${cleanParentPhone}&text=${encodeURIComponent(text)}` : `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+            window.open(target, '_blank');
+          },
+          () => {
+            const text = `EMERGENCY ALERT: I am near your child ${ch.name} (${ch.school}). Please contact me at this phone urgently.`;
+            const target = cleanParentPhone ? `https://api.whatsapp.com/send?phone=${cleanParentPhone}&text=${encodeURIComponent(text)}` : `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+            window.open(target, '_blank');
+          },
+          { enableHighAccuracy: true, timeout: 8000 }
+        );
+      } else {
+        const text = `EMERGENCY ALERT: I am near your child ${ch.name} (${ch.school}). Please contact me at this phone urgently.`;
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+      }
+    });
+
+    return;
+  }
+
+  // VEHICLE SCAN PAGE (4 PILLARS MATCHING IMAGE 3)
   app.innerHTML = `
     <main class="scan-page">
       <header class="scan-brand">
@@ -4220,7 +5197,7 @@ async function renderScan() {
           <p>${t.scanSubtitle}</p>
         </div>
 
-        <section class="scan-vehicle-card">
+        <section class="scan-vehicle-card" style="margin-bottom:18px;">
           <div class="vehicle-shield">
             ${qr.vehicle?.category === 'Car' ? '🚘' : '🏍️'}
           </div>
@@ -4230,22 +5207,58 @@ async function renderScan() {
               <span class="verified-shield">✓ VERIFIED</span>
             </div>
             <h2>${esc(qr.vehicle?.make || 'Vehicle')} ${esc(qr.vehicle?.model || '')}</h2>
+            <div style="font-family:var(--font-mono); font-size:12px; color:var(--cyan-400); margin-top:2px;">
+              ${esc(qr.vehicle?.registration || 'VERIFIED PLATE')} • ${esc(qr.qrId || '')}
+            </div>
+          </div>
         </section>
 
-        <!-- FAST COMMUNICATION ACTIONS: MASKED VOICE CALL & WHATSAPP ALERT -->
-        <section class="scan-fast-actions" style="margin:16px 0 20px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-          <!-- Masked Call Action -->
-          <button type="button" class="btn" id="btn-masked-call" style="background:linear-gradient(135deg, #059669 0%, #10b981 100%); color:#ffffff; border:none; padding:14px 16px; border-radius:14px; font-weight:800; font-size:13.5px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; box-shadow:0 8px 20px rgba(16, 185, 129, 0.35); cursor:pointer;">
-            <span style="font-size:20px;">📞 Private Masked Call</span>
-            <small style="font-size:10.5px; opacity:0.95; font-weight:500;">Zero Number Exposure • Telephony Bridge</small>
+        <!-- 4 PILLARS MATCHING THE PHYSICAL DECAL STICKER -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px;">
+          <!-- 1. CONTACT VEHICLE OWNER (GREEN) -->
+          <button type="button" class="btn" id="btn-pillar-contact" style="background:linear-gradient(135deg, #15803d 0%, #22c55e 100%); color:#ffffff; border:none; padding:12px 10px; border-radius:12px; font-weight:800; font-size:12.5px; display:flex; flex-direction:column; align-items:center; gap:4px; box-shadow:0 6px 14px rgba(34, 197, 94, 0.3); cursor:pointer;">
+            <span style="font-size:20px;">📞</span>
+            <span>CONTACT OWNER</span>
+            <small style="font-size:10px; opacity:0.95; font-weight:500;">Private Call / WhatsApp</small>
           </button>
 
-          <!-- WhatsApp Alert Action -->
-          <button type="button" class="btn" id="btn-whatsapp-alert" style="background:linear-gradient(135deg, #15803d 0%, #22c55e 100%); color:#ffffff; border:none; padding:14px 16px; border-radius:14px; font-weight:800; font-size:13.5px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; box-shadow:0 8px 20px rgba(34, 197, 94, 0.35); cursor:pointer;">
-            <span style="font-size:20px;">💬 WhatsApp Alert</span>
-            <small style="font-size:10.5px; opacity:0.95; font-weight:500;">Direct Notification to Vehicle Owner</small>
+          <!-- 2. EMERGENCY NEED HELP (RED) -->
+          <button type="button" class="btn" id="btn-pillar-emergency" style="background:linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); color:#ffffff; border:none; padding:12px 10px; border-radius:12px; font-weight:800; font-size:12.5px; display:flex; flex-direction:column; align-items:center; gap:4px; box-shadow:0 6px 14px rgba(239, 68, 68, 0.3); cursor:pointer;">
+            <span style="font-size:20px;">🚨</span>
+            <span>EMERGENCY SOS</span>
+            <small style="font-size:10px; opacity:0.95; font-weight:500;">Family & Police Alert</small>
           </button>
-        </section>
+
+          <!-- 3. PARKING WRONG PARKING (BLUE) -->
+          <button type="button" class="btn" id="btn-pillar-parking" style="background:linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%); color:#ffffff; border:none; padding:12px 10px; border-radius:12px; font-weight:800; font-size:12.5px; display:flex; flex-direction:column; align-items:center; gap:4px; box-shadow:0 6px 14px rgba(59, 130, 246, 0.3); cursor:pointer;">
+            <span style="font-size:20px;">🅿️</span>
+            <span>WRONG PARKING</span>
+            <small style="font-size:10px; opacity:0.95; font-weight:500;">Gate Blocked / Moving</small>
+          </button>
+
+          <!-- 4. REPORT ACCIDENT / ISSUE (YELLOW) -->
+          <button type="button" class="btn" id="btn-pillar-report" style="background:linear-gradient(135deg, #b45309 0%, #f59e0b 100%); color:#ffffff; border:none; padding:12px 10px; border-radius:12px; font-weight:800; font-size:12.5px; display:flex; flex-direction:column; align-items:center; gap:4px; box-shadow:0 6px 14px rgba(245, 158, 11, 0.3); cursor:pointer;">
+            <span style="font-size:20px;">⚠️</span>
+            <span>REPORT ACCIDENT</span>
+            <small style="font-size:10px; opacity:0.95; font-weight:500;">Damage / Towing / Lights</small>
+          </button>
+        </div>
+
+        <!-- EMERGENCY FAMILY CONTACTS BOX (If Available) -->
+        ${(qr.emergencyContacts && qr.emergencyContacts.length > 0) ? `
+          <div style="background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); border-radius:14px; padding:14px; margin-bottom:18px;">
+            <div style="font-size:12px; font-weight:700; color:#fca5a5; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+              <span>🚨 Verified Family Emergency Contacts</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+              ${qr.emergencyContacts.map(c => `
+                <a href="tel:${esc(c.phone)}" class="btn" style="background:#dc2626; color:#ffffff; text-decoration:none; padding:10px 12px; border-radius:10px; font-size:12.5px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px;">
+                  <span>📞 Call ${esc(c.relation)}</span>
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
 
         <form id="scan-form" class="scan-form">
           <div class="form-heading">
@@ -4400,6 +5413,42 @@ async function renderScan() {
       err.textContent = x.message;
     }
   };
+
+  // 4 Pillar Button Handlers matching physical sticker
+  document.querySelector('#btn-pillar-contact')?.addEventListener('click', () => {
+    maskedCallModal(tokenVal, qr);
+  });
+
+  document.querySelector('#btn-pillar-emergency')?.addEventListener('click', () => {
+    const radio = document.querySelector('input[name="category"][value*="Emergency"]');
+    if (radio) radio.checked = true;
+    const note = document.querySelector('#scan-note');
+    if (note) {
+      note.value = 'URGENT SAFETY ISSUE: Immediate assistance or contact requested.';
+      note.focus();
+    }
+    toast('🚨 Emergency option selected. Please add details and submit.', 'info');
+  });
+
+  document.querySelector('#btn-pillar-parking')?.addEventListener('click', () => {
+    const radio = document.querySelector('input[name="category"][value*="Parking"]');
+    if (radio) radio.checked = true;
+    const note = document.querySelector('#scan-note');
+    if (note) {
+      note.value = 'Vehicle is parked improperly or blocking gate/driveway. Please move slightly.';
+      note.focus();
+    }
+  });
+
+  document.querySelector('#btn-pillar-report')?.addEventListener('click', () => {
+    const radio = document.querySelector('input[name="category"][value*="Vehicle Issue"]') || document.querySelector('input[name="category"][value*="Traffic"]');
+    if (radio) radio.checked = true;
+    const note = document.querySelector('#scan-note');
+    if (note) {
+      note.value = 'Alert: Vehicle safety concern noticed (hazard lights ON, window rolled down, or damage).';
+      note.focus();
+    }
+  });
 
   // Fast Communication: Masked Call
   document.querySelector('#btn-masked-call')?.addEventListener('click', () => {
@@ -4621,41 +5670,50 @@ async function renderDealer() {
         </section>
 
         <!-- 3. KPI METRIC CARDS -->
-        <div class="dealer-kpis">
+        <div class="dealer-kpis" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
           <div class="dealer-kpi-card">
             <div class="dealer-kpi-label">
               <span>Ready Bay Stock</span>
               <span style="font-size:16px;">🏷️</span>
             </div>
-            <div class="dealer-kpi-val" style="color:#2563eb;">${m.readyStock} <span style="font-size:14px; font-weight:600; color:#64748b;">Units</span></div>
-            <div class="dealer-kpi-sub">Unassigned decals ready on shelf</div>
+            <div class="dealer-kpi-val" style="color:#2563eb;">${m.readyStock} <span style="font-size:13px; font-weight:600; color:#64748b;">Units</span></div>
+            <div class="dealer-kpi-sub">Unassigned decals on showroom shelf</div>
           </div>
 
           <div class="dealer-kpi-card">
             <div class="dealer-kpi-label">
-              <span>Active Road Protected</span>
+              <span>Active Vehicles</span>
               <span style="font-size:16px;">🛡️</span>
             </div>
-            <div class="dealer-kpi-val" style="color:#059669;">${m.activeProtected} <span style="font-size:14px; font-weight:600; color:#64748b;">Vehicles</span></div>
-            <div class="dealer-kpi-sub">Fitted decals on active road</div>
+            <div class="dealer-kpi-val" style="color:#059669;">${m.activeProtected} <span style="font-size:13px; font-weight:600; color:#64748b;">Fitted</span></div>
+            <div class="dealer-kpi-sub">SmartO decals active on road</div>
           </div>
 
           <div class="dealer-kpi-card">
             <div class="dealer-kpi-label">
-              <span>Pending Road Test</span>
+              <span>Customer Paid (Done)</span>
+              <span style="font-size:16px;">💳</span>
+            </div>
+            <div class="dealer-kpi-val" style="color:#059669;">₹${(m.customerPaid || 0).toLocaleString('en-IN')}</div>
+            <div class="dealer-kpi-sub">Settled via UPI / Cash / Card</div>
+          </div>
+
+          <div class="dealer-kpi-card" style="border-left: 3px solid #ea580c;">
+            <div class="dealer-kpi-label">
+              <span style="color:#c2410c; font-weight:700;">Showroom Pending Dues</span>
               <span style="font-size:16px;">⏳</span>
             </div>
-            <div class="dealer-kpi-val" style="color:#d97706;">${m.pendingActivation} <span style="font-size:14px; font-weight:600; color:#64748b;">Pending</span></div>
-            <div class="dealer-kpi-sub">Awaiting customer final scan</div>
+            <div class="dealer-kpi-val" style="color:#ea580c;">₹${(m.pendingDues || 0).toLocaleString('en-IN')}</div>
+            <div class="dealer-kpi-sub">Showroom account credit pending invoice</div>
           </div>
 
           <div class="dealer-kpi-card">
             <div class="dealer-kpi-label">
-              <span>Total Fees Collected</span>
+              <span>Total Fitment Volume</span>
               <span style="font-size:16px;">💰</span>
             </div>
-            <div class="dealer-kpi-val" style="color:#0f172a;">₹${m.feesCollected.toLocaleString('en-IN')}</div>
-            <div class="dealer-kpi-sub">Showroom fitment & sticker revenue</div>
+            <div class="dealer-kpi-val" style="color:#0f172a;">₹${(m.feesCollected || 0).toLocaleString('en-IN')}</div>
+            <div class="dealer-kpi-sub">Total ₹499 package volume</div>
           </div>
         </div>
 
@@ -4918,13 +5976,13 @@ function attachDealerEvents(data) {
 
   // Hero Actions
   document.querySelector('#dealer-btn-scan-hero')?.addEventListener('click', () => {
-    scanDecalModal('', data.unassignedStock);
+    scanDecalModal('', data.unassignedStock, data.showroom?.brand);
   });
   document.querySelector('#tab-btn-scan-fit')?.addEventListener('click', () => {
-    scanDecalModal('', data.unassignedStock);
+    scanDecalModal('', data.unassignedStock, data.showroom?.brand);
   });
   document.querySelector('#btn-empty-fit-vehicle')?.addEventListener('click', () => {
-    scanDecalModal('', data.unassignedStock);
+    scanDecalModal('', data.unassignedStock, data.showroom?.brand);
   });
 
   document.querySelector('#dealer-btn-request-stock')?.addEventListener('click', () => {
@@ -4941,7 +5999,7 @@ function attachDealerEvents(data) {
   document.querySelectorAll('.btn-fit-this-qr').forEach(btn => {
     btn.addEventListener('click', () => {
       const qid = btn.getAttribute('data-qr-id');
-      scanDecalModal(qid, data.unassignedStock);
+      scanDecalModal(qid, data.unassignedStock, data.showroom?.brand);
     });
   });
 
@@ -4973,16 +6031,26 @@ function attachDealerEvents(data) {
   }
 }
 
-function scanDecalModal(prefillQr = '', unassignedStock = []) {
+function scanDecalModal(prefillQr = '', unassignedStock = [], defaultBrand = '') {
   const root = document.querySelector('#modal-root');
+
+  const popularBrands = [
+    'Maruti Suzuki', 'Hyundai', 'Tata Motors', 'Mahindra', 'Honda',
+    'Toyota', 'Kia', 'Hero MotoCorp', 'Bajaj Auto', 'TVS Motor',
+    'Royal Enfield', 'Suzuki Motorcycle', 'Commercial / Other'
+  ];
+
+  const relationOptions = ['Father', 'Mother', 'Brother', 'Sister', 'Spouse', 'Friend', 'Other'];
+
+  const selectedBrand = defaultBrand || (popularBrands.includes(state.cache.dealerDashboard?.showroom?.brand) ? state.cache.dealerDashboard?.showroom?.brand : 'Maruti Suzuki');
 
   root.innerHTML = `
     <div class="modal-backdrop">
       <section class="modal-card" style="max-width:580px; max-height:92vh; overflow-y:auto;">
         <button class="modal-close" data-close>×</button>
         <span class="eyebrow" style="color:#2563eb;">FLOOR EXECUTIVE WORKSPACE</span>
-        <h2>Scan QR Decal to Fit New Vehicle</h2>
-        <p class="muted">Align physical decal in camera viewfinder or select unassigned serialized QR from showroom stock.</p>
+        <h2>Vehicle Fitment & Decal Activation</h2>
+        <p class="muted">Link physical SmartO safety decal with vehicle owner and emergency contacts. Fee is fixed at ₹499 with GST.</p>
 
         <!-- CAMERA VIEWFINDER -->
         <div class="scanner-viewfinder-box">
@@ -4998,7 +6066,7 @@ function scanDecalModal(prefillQr = '', unassignedStock = []) {
         <form id="dealer-activate-form">
           <!-- 1. Decal Selection -->
           <label>
-            QR Decal Serial Identifier
+            QR Decal Serial Identifier *
             ${unassignedStock.length > 0 ? `
               <select name="qrCode" id="modal-qr-select" required>
                 <option value="">-- Choose unassigned QR or scan with camera --</option>
@@ -5009,122 +6077,138 @@ function scanDecalModal(prefillQr = '', unassignedStock = []) {
                 `).join('')}
               </select>
             ` : `
-              <input name="qrCode" id="modal-qr-input" value="${esc(prefillQr)}" placeholder="e.g. SV-BR-00000136" required style="font-family:var(--font-mono); font-weight:700;">
+              <input name="qrCode" id="modal-qr-input" value="${esc(prefillQr)}" placeholder="e.g. SVBR-00000001" required style="font-family:var(--font-mono); font-weight:700;">
             `}
             <small style="font-size:11px; color:#64748b; display:block; margin-top:3px;">
               Camera feed automatically scans and fills the serial number above.
             </small>
           </label>
 
-          <!-- 2. Brand New Vehicle Delivery & Pending Plate Toggle -->
-          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; margin-bottom:14px;">
-            <label style="display:flex; align-items:center; gap:10px; margin:0; cursor:pointer; font-weight:700; color:#1e40af; font-size:13px;">
-              <input type="checkbox" id="modal-chk-pending-plate" name="platePending" value="1" style="width:18px; height:18px; accent-color:#2563eb;">
-              <span>🆕 Brand New Delivery (RTO Permanent Plate Pending / 5-7 Days)</span>
-            </label>
-            <small style="display:block; font-size:11.5px; color:#475569; margin-top:4px; line-height:1.4;">
-              If delivering without metal HSRP number plate, enter Chassis VIN. Owner can later update plate from their dashboard.
+          <!-- 2. OWNER DETAILS (FIRST AS PER REQUIREMENT) -->
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin:12px 0;">
+            <div style="font-weight:700; font-size:12px; color:#0f172a; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">1. Vehicle Owner Details</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <label style="margin:0;">
+                <span style="font-size:12px; font-weight:700; color:#1e293b;">Owner Mobile Number *</span>
+                <input name="ownerPhone" id="modal-fit-phone" placeholder="e.g. 9876543210" required maxlength="15" style="font-weight:700; color:#0f172a;">
+              </label>
+              <label style="margin:0;">
+                <span style="font-size:12px; font-weight:600; color:#475569;">Owner Full Name</span>
+                <input name="ownerName" id="modal-fit-name" placeholder="e.g. Ramesh Kumar" maxlength="80">
+              </label>
+            </div>
+          </div>
+
+          <!-- 3. VEHICLE DETAILS (BRAND DROPDOWN, NO CHASSIS/ENGINE/COLOR) -->
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:12px;">
+            <div style="font-weight:700; font-size:12px; color:#0f172a; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">2. Vehicle Specifications</div>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+              <label style="margin:0;">
+                <span style="font-size:12px; font-weight:600; color:#475569;">Vehicle Brand *</span>
+                <select name="brand" id="modal-fit-brand" required>
+                  ${popularBrands.map(b => `<option value="${esc(b)}" ${b === selectedBrand ? 'selected' : ''}>${esc(b)}</option>`).join('')}
+                </select>
+              </label>
+              <label style="margin:0;">
+                <span style="font-size:12px; font-weight:600; color:#475569;">Model Name *</span>
+                <input name="model" id="modal-fit-model" value="Swift Dzire" required maxlength="50" placeholder="e.g. Brezza, Creta, Splendor">
+              </label>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:10px;">
+              <label id="lbl-fit-plate" style="margin:0;">
+                <span style="font-size:12px; font-weight:600; color:#475569;">Registration Plate *</span>
+                <input name="registration" id="modal-fit-plate" placeholder="e.g. BR01AB1234" required maxlength="16" style="text-transform:uppercase; font-family:var(--font-mono); font-weight:700;">
+              </label>
+              <label style="margin:0;">
+                <span style="font-size:12px; font-weight:600; color:#475569;">Category</span>
+                <select name="category" id="modal-fit-category">
+                  <option value="Car" selected>Four Wheeler (4W)</option>
+                  <option value="Motorcycle">Two Wheeler (2W)</option>
+                  <option value="Commercial">Commercial</option>
+                </select>
+              </label>
+            </div>
+
+            <div style="margin-top:8px;">
+              <label style="display:flex; align-items:center; gap:8px; margin:0; cursor:pointer; font-size:11.5px; color:#64748b;">
+                <input type="checkbox" id="modal-chk-pending-plate" name="platePending" value="1" style="width:15px; height:15px;">
+                <span>Brand new vehicle delivery (RTO plate pending / 5-7 days)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 4. EMERGENCY CONTACT DETAILS WITH RELATION -->
+          <div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:12px; margin-bottom:12px;">
+            <div style="font-weight:700; font-size:12px; color:#c2410c; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:6px;">
+              <span>🚨 Emergency Contacts (Relation Visible to Public Scanner)</span>
+            </div>
+
+            <!-- Emergency Contact 1 -->
+            <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:10px; margin-bottom:8px;">
+              <label style="margin:0;">
+                <span style="font-size:11.5px; font-weight:600; color:#431407;">Emergency 1 Phone Number</span>
+                <input name="emergency1Phone" id="modal-fit-emg1-phone" placeholder="e.g. 9811122334" maxlength="15">
+              </label>
+              <label style="margin:0;">
+                <span style="font-size:11.5px; font-weight:600; color:#431407;">Relation</span>
+                <select name="emergency1Relation" id="modal-fit-emg1-rel">
+                  ${relationOptions.map(r => `<option value="${esc(r)}" ${r === 'Father' ? 'selected' : ''}>${esc(r)}</option>`).join('')}
+                </select>
+              </label>
+            </div>
+
+            <!-- Emergency Contact 2 -->
+            <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:10px;">
+              <label style="margin:0;">
+                <span style="font-size:11.5px; font-weight:600; color:#431407;">Emergency 2 Phone Number</span>
+                <input name="emergency2Phone" id="modal-fit-emg2-phone" placeholder="e.g. 9822233445" maxlength="15">
+              </label>
+              <label style="margin:0;">
+                <span style="font-size:11.5px; font-weight:600; color:#431407;">Relation</span>
+                <select name="emergency2Relation" id="modal-fit-emg2-rel">
+                  ${relationOptions.map(r => `<option value="${esc(r)}" ${r === 'Mother' ? 'selected' : ''}>${esc(r)}</option>`).join('')}
+                </select>
+              </label>
+            </div>
+            <small style="display:block; font-size:10.5px; color:#9a3412; margin-top:6px;">
+              Public scan will show "Call Father" or "Call Mother" for immediate citizen assistance without revealing full names.
             </small>
           </div>
 
-          <!-- 3. Vehicle Registration & Category -->
-          <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:10px;">
-            <label id="lbl-fit-plate">
-              <span id="text-fit-plate">Vehicle Registration Plate</span> <span id="req-fit-plate" style="color:#ef4444;">*</span>
-              <input name="registration" id="modal-fit-plate" placeholder="e.g. BR06XY1234" required maxlength="16" style="text-transform:uppercase; font-family:var(--font-mono); font-weight:700;">
-            </label>
-            <label>
-              Vehicle Category
-              <select name="category" id="modal-fit-category">
-                <option value="Car" selected>Passenger Car (4W)</option>
-                <option value="Motorcycle">Motorcycle / Scooter (2W)</option>
-                <option value="Commercial">Commercial / Transport</option>
-              </select>
-            </label>
-          </div>
-
-          <!-- 4. Chassis Number & Engine Number -->
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <label id="lbl-fit-chassis">
-              <span>Chassis Number (VIN)</span> <span id="req-fit-chassis" style="color:#ef4444; display:none;">*</span>
-              <input name="chassisNumber" id="modal-fit-chassis" placeholder="e.g. MA3EWB41S00123456" maxlength="25" style="text-transform:uppercase; font-family:var(--font-mono); font-weight:600;">
-            </label>
-            <label>
-              <span>Engine Number</span>
-              <input name="engineNumber" id="modal-fit-engine" placeholder="e.g. K12MN-8849201" maxlength="25" style="text-transform:uppercase; font-family:var(--font-mono); font-weight:600;">
-            </label>
-          </div>
-
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <label>
-              Make (Brand)
-              <input name="make" id="modal-fit-make" value="Maruti Suzuki" required maxlength="50" placeholder="e.g. Maruti Suzuki, Hyundai">
-            </label>
-            <label>
-              Model Name
-              <input name="model" id="modal-fit-model" value="Swift Dzire" required maxlength="50" placeholder="e.g. Brezza ZXi, Creta">
-            </label>
-          </div>
-
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <label>
-              Vehicle Exterior Color
-              <input name="color" id="modal-fit-color" value="Pearl Arctic White" maxlength="30" placeholder="e.g. Pearl White, Magma Grey">
-            </label>
-            <label>
-              Emergency Alternate Contact
-              <input name="emergencyContact" id="modal-fit-emergency" placeholder="e.g. +91 98111 22334" maxlength="20">
-            </label>
-          </div>
-
-          <!-- 5. Owner Details -->
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <label>
-              Customer / Owner Full Name
-              <input name="ownerName" id="modal-fit-name" placeholder="e.g. Ravi Kumar" required maxlength="80">
-            </label>
-            <label>
-              Owner Mobile Number
-              <input name="ownerPhone" id="modal-fit-phone" placeholder="e.g. +91 98765 11223" required maxlength="20">
-            </label>
-          </div>
-
-          <!-- 6. Fitment Fee Collection -->
-          <label>
-            Fitment & Decal Package Fee Collected
-            <div class="fee-options-grid">
-              <button type="button" class="fee-btn-option selected" data-fee="299">
-                ₹299
-                <small style="display:block; font-size:10px; font-weight:normal; margin-top:2px;">Standard Package</small>
-              </button>
-              <button type="button" class="fee-btn-option" data-fee="199">
-                ₹199
-                <small style="display:block; font-size:10px; font-weight:normal; margin-top:2px;">Basic Decal</small>
-              </button>
-              <button type="button" class="fee-btn-option" data-fee="0">
-                ₹0 (Free)
-                <small style="display:block; font-size:10px; font-weight:normal; margin-top:2px;">Promo / Included</small>
-              </button>
+          <!-- 5. FIXED SINGLE PRICING ₹499 WITH GST -->
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:700; font-size:13px; color:#15803d;">SmartO Vehicle Safety Decal Package</div>
+              <div style="font-size:11px; color:#166534;">Official Lifetime Road Protection + QR Holographic Decal (GST Included)</div>
             </div>
-            <input type="hidden" name="feeCollected" id="modal-fee-input" value="299">
-          </label>
+            <div style="font-family:var(--font-mono); font-size:20px; font-weight:800; color:#15803d;">
+              ₹499
+            </div>
+            <input type="hidden" name="feeCollected" value="499">
+          </div>
 
+          <!-- 6. PAYMENT MODE -->
           <label>
-            Payment Mode
-            <select name="paymentMode" id="modal-payment-mode">
-              <option value="UPI" selected>UPI / PhonePe / GPay</option>
+            Payment Mode *
+            <select name="paymentMode" id="modal-payment-mode" required>
+              <option value="UPI" selected>UPI / PhonePe / Google Pay</option>
               <option value="Cash">Cash at Delivery Bay</option>
               <option value="Card">Card / EDC POS Terminal</option>
-              <option value="Complimentary">Complimentary Showroom Delivery</option>
+              <option value="Showroom Payment">Showroom Payment (Pending Showroom Account)</option>
             </select>
+            <small style="font-size:11px; color:#64748b; display:block; margin-top:3px;">
+              Select "Showroom Payment" if payment will be settled in bulk by showroom account ledger.
+            </small>
           </label>
 
           <div id="dealer-activate-error" class="form-error"></div>
 
           <div class="modal-actions" style="margin-top:20px;">
             <button class="btn secondary" type="button" data-close>Cancel</button>
-            <button class="btn primary" type="submit" id="btn-submit-activation" style="padding:10px 18px;">
-              ✓ Bind Decal & Activate Road Protection
+            <button class="btn primary" type="submit" id="btn-submit-activation" style="padding:10px 22px; font-weight:700;">
+              ✓ Proceed & Activate Decal
             </button>
           </div>
         </form>
@@ -5181,24 +6265,15 @@ function scanDecalModal(prefillQr = '', unassignedStock = []) {
   // Pending Plate checkbox logic
   const chkPending = root.querySelector('#modal-chk-pending-plate');
   const plateInput = root.querySelector('#modal-fit-plate');
-  const reqPlate = root.querySelector('#req-fit-plate');
-  const chassisInput = root.querySelector('#modal-fit-chassis');
-  const reqChassis = root.querySelector('#req-fit-chassis');
 
   chkPending.addEventListener('change', () => {
     if (chkPending.checked) {
       plateInput.removeAttribute('required');
-      plateInput.placeholder = 'Optional (Pending RTO Plate)';
-      reqPlate.style.display = 'none';
-      chassisInput.setAttribute('required', 'required');
-      reqChassis.style.display = 'inline';
-      chassisInput.focus();
+      plateInput.placeholder = 'TEMP (Auto-generated pending RTO)';
+      plateInput.value = '';
     } else {
       plateInput.setAttribute('required', 'required');
-      plateInput.placeholder = 'e.g. BR06XY1234';
-      reqPlate.style.display = 'inline';
-      chassisInput.removeAttribute('required');
-      reqChassis.style.display = 'none';
+      plateInput.placeholder = 'e.g. BR01AB1234';
     }
   });
 
@@ -5212,16 +6287,6 @@ function scanDecalModal(prefillQr = '', unassignedStock = []) {
     if (e.target.classList.contains('modal-backdrop')) closeModal();
   };
 
-  // Fee chip selector
-  root.querySelectorAll('.fee-btn-option').forEach(btn => {
-    btn.addEventListener('click', () => {
-      root.querySelectorAll('.fee-btn-option').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      const val = btn.getAttribute('data-fee');
-      root.querySelector('#modal-fee-input').value = val;
-    });
-  });
-
   // Submit Handler
   root.querySelector('#dealer-activate-form').onsubmit = async (e) => {
     e.preventDefault();
@@ -5230,22 +6295,22 @@ function scanDecalModal(prefillQr = '', unassignedStock = []) {
     errBox.textContent = '';
     const submitBtn = root.querySelector('#btn-submit-activation');
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Activating decal & writing ledger...';
+    submitBtn.textContent = 'Activating decal & registering vehicle...';
 
     try {
       const res = await post('/api/dealer/activate-decal', {
         qrCode: fd.get('qrCode'),
         registration: fd.get('registration') || '',
-        chassisNumber: fd.get('chassisNumber') || '',
-        engineNumber: fd.get('engineNumber') || '',
-        emergencyContact: fd.get('emergencyContact') || '',
-        make: fd.get('make'),
-        model: fd.get('model'),
         category: fd.get('category'),
-        color: fd.get('color'),
+        brand: fd.get('brand'),
+        model: fd.get('model'),
         ownerName: fd.get('ownerName'),
         ownerPhone: fd.get('ownerPhone'),
-        feeCollected: fd.get('feeCollected'),
+        emergency1Phone: fd.get('emergency1Phone') || '',
+        emergency1Relation: fd.get('emergency1Relation') || 'Father',
+        emergency2Phone: fd.get('emergency2Phone') || '',
+        emergency2Relation: fd.get('emergency2Relation') || 'Mother',
+        feeCollected: 499,
         paymentMode: fd.get('paymentMode')
       });
 
@@ -5256,7 +6321,7 @@ function scanDecalModal(prefillQr = '', unassignedStock = []) {
     } catch (err) {
       errBox.textContent = err.message;
       submitBtn.disabled = false;
-      submitBtn.textContent = '✓ Bind Decal & Activate Road Protection';
+      submitBtn.textContent = '✓ Proceed & Activate Decal';
     }
   };
 }

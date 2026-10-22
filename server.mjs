@@ -10,7 +10,9 @@ import { HttpError, audit, dashboard, listQrs, createBatch, transitionQr, listSh
   dealerDashboard, dealerRequestStock, dealerGetRequests, adminListRequisitions, adminAllotStock,
   dealerActivateDecal, dealerLedger, dealerAvailableStock,
   ownerUpdateVehicle, ownerUpdateProfile, ownerRequestReplacement, ownerRebindDecal,
-  storeCatalog, storeCreateOrder, storeGetOrders, initiateMaskedCall } from './src/operations.mjs';
+  storeCatalog, storeCreateOrder, storeGetOrders, initiateMaskedCall,
+  listBatches, getBatchDetails, listSalesAgents, createSalesAgent, allocateStockToAgent,
+  distributeAgentStockToShowroom, listSchools, createSchool, registerChild, listChildren } from './src/operations.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const port = Number(process.env.PORT || 3000);
@@ -25,6 +27,9 @@ const mime = {
   '.js': 'text/javascript; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
   '.ico': 'image/x-icon'
 };
 const hash = x => createHash('sha256').update(x).digest('hex');
@@ -194,10 +199,56 @@ const server = createServer(async (req, res) => {
       requireUser(user, ['ADMIN', 'SHOWROOM_MANAGER']);
       return json(res, 200, lookupQr(url.searchParams.get('q')));
     }
+    if (path === '/api/batches' && method === 'GET') {
+      requireUser(user, ['ADMIN']);
+      return json(res, 200, { items: listBatches() });
+    }
+    const batchDetailMatch = path.match(/^\/api\/batches\/([^/]+)$/);
+    if (batchDetailMatch && method === 'GET') {
+      requireUser(user, ['ADMIN']);
+      return json(res, 200, getBatchDetails(decodeURIComponent(batchDetailMatch[1])));
+    }
     if (path === '/api/batches' && method === 'POST') {
       const actor = requireUser(user, ['ADMIN']), body = await readBody(req);
       return json(res, 201, createBatch(actor, body));
     }
+
+    // Sales Team & Field Agent Operations (3-Level Hierarchy)
+    if (path === '/api/sales/agents' && method === 'GET') {
+      requireUser(user, ['ADMIN', 'SALES_AGENT']);
+      return json(res, 200, { items: listSalesAgents() });
+    }
+    if (path === '/api/sales/agents' && method === 'POST') {
+      const actor = requireUser(user, ['ADMIN']), body = await readBody(req);
+      return json(res, 201, createSalesAgent(actor, body));
+    }
+    if (path === '/api/sales/allocate' && method === 'POST') {
+      const actor = requireUser(user, ['ADMIN']), body = await readBody(req);
+      return json(res, 200, allocateStockToAgent(actor, body));
+    }
+    if (path === '/api/sales/distribute-to-showroom' && method === 'POST') {
+      const actor = requireUser(user, ['ADMIN', 'SALES_AGENT']), body = await readBody(req);
+      return json(res, 200, distributeAgentStockToShowroom(actor, body));
+    }
+
+    // School & Child Safety Operations
+    if (path === '/api/schools' && method === 'GET') {
+      requireUser(user, ['ADMIN']);
+      return json(res, 200, { items: listSchools() });
+    }
+    if (path === '/api/schools' && method === 'POST') {
+      const actor = requireUser(user, ['ADMIN']), body = await readBody(req);
+      return json(res, 201, createSchool(actor, body));
+    }
+    if (path === '/api/schools/register-child' && method === 'POST') {
+      const actor = requireUser(user, ['ADMIN']), body = await readBody(req);
+      return json(res, 201, registerChild(actor, body));
+    }
+    if (path === '/api/schools/children' && method === 'GET') {
+      requireUser(user, ['ADMIN']);
+      return json(res, 200, { items: listChildren(url.searchParams.get('schoolId')) });
+    }
+
     const unitMatch = path.match(/^\/api\/qrs\/([^/]+)\/([^/]+)$/);
     if (unitMatch && method === 'POST') {
       const actor = requireUser(user, ['ADMIN']), body = await readBody(req);

@@ -162,25 +162,41 @@ export function listQrs(status = '') {
   return status ? db.prepare(sql).all(status) : db.prepare(sql).all();
 }
 
-export function createBatch(actor, { prefix = 'SV-BR', quantity, templateVersion = 'SVQR-2.0' }) {
-  const count = Number(quantity);
+export function createBatch(actor, { prefix = 'SVBR', quantity, count: countArg, category = 'VEHICLE', templateVersion = 'SVQR-2.0' }) {
+  const count = Number(quantity ?? countArg);
   if (!Number.isInteger(count) || count < 1 || count > 10000) throw new HttpError(400, 'Quantity must be a whole number from 1 to 10,000.');
-  if (!/^[A-Z0-9-]{2,18}$/.test(prefix)) throw new HttpError(400, 'Prefix may contain uppercase letters, numbers and hyphens only.');
-  
-  const batchId = id('bat'), at = now(), first = db.prepare('SELECT count(*) AS n FROM qr_units WHERE qr_id LIKE ?').get(`${prefix}-%`).n + 1;
-  transaction(() => {
-    db.prepare('INSERT INTO batches (id,prefix,quantity,status,created_by,created_at,template_version) VALUES (?,?,?,?,?,?,?)')
-      .run(batchId, prefix, count, 'GENERATED', actor.id, at, String(templateVersion).slice(0, 32));
-    const insert = db.prepare(`INSERT INTO qr_units (id,qr_id,public_token,batch_id,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?)`);
-    const event = db.prepare(`INSERT INTO inventory_events (id,qr_id,event_type,from_location,to_location,actor_id,created_at) VALUES (?,?,?,?,?,?,?)`);
+  const cleanPrefix = String(prefix || 'SVBR').trim().toUpperCase().replace(/[^A-Z0-9-]/g, '') || 'SVBR';
+  const batchCat = ['SCHOOL', 'VEHICLE'].includes(category) ? category : 'VEHICLE';
+
+  return transaction(() => {
+    db.prepare(`INSERT OR IGNORE INTO qr_sequences (prefix, last_val) VALUES (?, 0)`).run(cleanPrefix);
+    const seqRow = db.prepare(`SELECT last_val FROM qr_sequences WHERE prefix = ?`).get(cleanPrefix);
+    const startNum = (seqRow?.last_val || 0) + 1;
+    const endNum = startNum + count - 1;
+    db.prepare(`UPDATE qr_sequences SET last_val = ? WHERE prefix = ?`).run(endNum, cleanPrefix);
+
+    const seriesStart = `${cleanPrefix}-${String(startNum).padStart(8, '0')}`;
+    const seriesEnd = `${cleanPrefix}-${String(endNum).padStart(8, '0')}`;
+    const batchId = id('bat'), at = now();
+
+    db.prepare(`INSERT INTO batches (id, prefix, quantity, category, series_start, series_end, status, created_by, created_at, template_version)
+      VALUES (?, ?, ?, ?, ?, ?, 'GENERATED', ?, ?, ?)`)
+      .run(batchId, cleanPrefix, count, batchCat, seriesStart, seriesEnd, actor.id, at, String(templateVersion).slice(0, 32));
+
+    const insert = db.prepare(`INSERT INTO qr_units (id, qr_id, public_token, batch_id, category, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'GENERATED', ?, ?)`);
+    const event = db.prepare(`INSERT INTO inventory_events (id, qr_id, event_type, from_location, to_location, actor_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`);
+
     for (let i = 0; i < count; i++) {
-      const serial = String(first + i).padStart(8, '0'), qrId = `${prefix}-${serial}`, unitId = id('qr'), atUnit = now();
-      insert.run(unitId, qrId, token(), batchId, 'GENERATED', atUnit, atUnit);
-      event.run(id('evt'), unitId, 'GENERATED', 'SYSTEM', 'PRODUCTION', actor.id, atUnit);
+      const serial = String(startNum + i).padStart(8, '0');
+      const qrId = `${cleanPrefix}-${serial}`;
+      const unitId = id('qr');
+      insert.run(unitId, qrId, token(), batchId, batchCat, at, at);
+      event.run(id('evt'), unitId, 'GENERATED', 'SYSTEM', 'PRODUCTION', actor.id, at);
     }
-    audit(actor, 'BATCH_CREATED', 'batch', batchId, { prefix, quantity: count, templateVersion });
+
+    audit(actor, 'BATCH_CREATED', 'batch', batchId, { prefix: cleanPrefix, quantity: count, category: batchCat, seriesStart, seriesEnd });
+    return { id: batchId, batchId, prefix: cleanPrefix, quantity: count, count, category: batchCat, seriesStart, seriesEnd, status: 'GENERATED', createdAt: at };
   });
-  return { id: batchId, prefix, quantity: count, status: 'GENERATED', createdAt: at };
 }
 
 const actions = {
@@ -242,37 +258,62 @@ export function transitionQr(actor, unitId, action, input = {}) {
 }
 
 export function listShowrooms() {
-  return db.prepare('SELECT id,name,code,city,state,status,created_at FROM showrooms ORDER BY name').all();
+  return db.prepare('SELECT * FROM showrooms ORDER BY name').all();
 }
 
 export function createShowroom(actor, input) {
   const name = String(input.name || '').trim();
   if (name.length < 3 || name.length > 120) throw new HttpError(400, 'Showroom name must be between 3 and 120 characters.');
 
-  let code = String(input.code || '').trim().toUpperCase();
-  if (!code) {
-    const prefix = (input.city ? String(input.city).slice(0, 3).toUpperCase() : 'HUB');
-    const count = db.prepare('SELECT count(*) AS n FROM showrooms').get().n + 1;
-    code = `${prefix}-${String(count).padStart(3, '0')}`;
-  }
-  if (code.length < 3 || code.length > 20) throw new HttpError(400, 'Dealer code must be between 3 and 20 characters.');
-
-  const existing = db.prepare('SELECT id FROM showrooms WHERE code = ?').get(code);
-  if (existing) throw new HttpError(409, `A showroom with dealer code "${code}" already exists.`);
-
   const city = String(input.city || 'Patna').trim();
+  const region = String(input.region || 'Central Bihar').trim();
   const state = String(input.state || 'Bihar').trim();
-  const status = ['ACTIVE', 'INACTIVE'].includes(input.status) ? input.status : 'ACTIVE';
+  const address = String(input.address || '').trim();
+  const mapUrl = String(input.mapUrl || input.map_url || '').trim();
+  const category = ['Two Wheeler', 'Four Wheeler', 'Commercial', 'Multi-Brand'].includes(input.category) ? input.category : 'Two Wheeler';
+  const brand = String(input.brand || 'Maruti Suzuki').trim();
+  const ownerName = String(input.ownerName || '').trim();
+  const ownerPhone = input.ownerPhone ? normalizePhone(input.ownerPhone) : '';
+  const managerName = String(input.managerName || '').trim();
+  const managerPhone = input.managerPhone ? normalizePhone(input.managerPhone) : '';
+
+  // Auto-generate unique dealer code e.g. PAT-015
+  const prefix = (city.length >= 3 ? city.slice(0, 3).toUpperCase() : 'HUB');
+  const count = db.prepare('SELECT count(*) AS n FROM showrooms').get().n + 1;
+  const code = `${prefix}-${String(count).padStart(3, '0')}`;
 
   const showroomId = id('shr');
   const at = now();
 
-  db.prepare(`INSERT INTO showrooms (id, name, code, city, state, status, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?)`).run(showroomId, name, code, city, state, status, at);
+  return transaction(() => {
+    db.prepare(`INSERT INTO showrooms (id, name, code, city, region, state, address, map_url, category, brand, owner_name, owner_phone, manager_name, manager_phone, status, pending_dues, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', 0, ?)`)
+      .run(showroomId, name, code, city, region, state, address, mapUrl, category, brand, ownerName, ownerPhone, managerName, managerPhone, at);
 
-  audit(actor, 'SHOWROOM_CREATED', 'showroom', showroomId, { name, code, city, state, status });
+    // Auto-generate login credentials for Showroom Manager
+    const cleanCode = code.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const managerEmail = `dealer.${cleanCode}@smartoqr.in`;
+    const tempPassword = `SmartO@${code.replace('-', '')}2026`;
+    const rec = passwordRecord(tempPassword);
+    const userId = id('usr');
 
-  return db.prepare('SELECT id, name, code, city, state, status, created_at FROM showrooms WHERE id = ?').get(showroomId);
+    db.prepare(`INSERT INTO users (id, email, name, role, phone, showroom_id, password_salt, password_hash, created_at)
+      VALUES (?, ?, ?, 'SHOWROOM_MANAGER', ?, ?, ?, ?, ?)`)
+      .run(userId, managerEmail, managerName || `${name} Manager`, managerPhone || null, showroomId, rec.salt, rec.hash, at);
+
+    audit(actor, 'SHOWROOM_CREATED', 'showroom', showroomId, { name, code, city, brand, managerEmail });
+
+    const created = db.prepare('SELECT * FROM showrooms WHERE id = ?').get(showroomId);
+    return {
+      showroom: created,
+      managerCredentials: {
+        email: managerEmail,
+        tempPassword,
+        managerName: managerName || `${name} Manager`,
+        managerPhone
+      }
+    };
+  });
 }
 
 export function listVehicles() {
@@ -296,10 +337,54 @@ export function updateMessage(actor, messageId, status) {
 }
 
 export function publicQr(tokenValue) {
-  const q = db.prepare(`SELECT q.id,q.qr_id,q.status,v.make,v.model,v.category,v.color
-    FROM qr_units q LEFT JOIN vehicles v ON v.id=q.vehicle_id WHERE q.public_token=?`).get(tokenValue);
-  if (!q || q.status !== 'ACTIVE') return { active: false };
-  return { active: true, qrId: q.qr_id, vehicle: { make: q.make, model: q.model, category: q.category, color: q.color } };
+  const q = db.prepare(`SELECT q.id, q.qr_id, q.status, q.category AS qr_category,
+    v.make, v.model, v.category, v.brand, v.registration,
+    v.emergency_1_phone, v.emergency_1_relation, v.emergency_2_phone, v.emergency_2_relation,
+    c.child_name, c.class_sec, c.blood_group, c.parent_name, c.parent_phone_1, c.parent_phone_2,
+    s.name AS school_name, s.contact_phone AS school_phone
+    FROM qr_units q
+    LEFT JOIN vehicles v ON v.id=q.vehicle_id
+    LEFT JOIN children c ON c.qr_id=q.id
+    LEFT JOIN schools s ON s.id=c.school_id
+    WHERE q.public_token=?`).get(tokenValue);
+
+  if (!q || q.status !== 'ACTIVE') return { active: false, qrId: q?.qr_id };
+
+  if (q.qr_category === 'SCHOOL' || q.child_name) {
+    return {
+      active: true,
+      category: 'SCHOOL',
+      qrId: q.qr_id,
+      child: {
+        name: q.child_name,
+        school: q.school_name,
+        classSec: q.class_sec,
+        bloodGroup: q.blood_group,
+        contacts: [
+          q.parent_phone_1 ? { phone: q.parent_phone_1, relation: 'Parent / Father' } : null,
+          q.parent_phone_2 ? { phone: q.parent_phone_2, relation: 'Parent / Mother' } : null,
+          q.school_phone ? { phone: q.school_phone, relation: 'School Emergency' } : null
+        ].filter(Boolean)
+      }
+    };
+  }
+
+  // Vehicle Decal:
+  return {
+    active: true,
+    category: 'VEHICLE',
+    qrId: q.qr_id,
+    vehicle: {
+      make: q.make || q.brand,
+      model: q.model,
+      category: q.category,
+      registration: q.registration ? `${q.registration.slice(0, 4)}••••${q.registration.slice(-2)}` : 'VERIFIED'
+    },
+    emergencyContacts: [
+      q.emergency_1_phone ? { phone: q.emergency_1_phone, relation: q.emergency_1_relation || 'Father' } : null,
+      q.emergency_2_phone ? { phone: q.emergency_2_phone, relation: q.emergency_2_relation || 'Mother' } : null
+    ].filter(Boolean)
+  };
 }
 
 export function lookupQr(query) {
@@ -460,16 +545,18 @@ export function dealerDashboard(actor, requestedShowroomId = null) {
   const readyStock = db.prepare("SELECT count(*) AS n FROM qr_units WHERE showroom_id = ? AND status = 'SHOWROOM_STOCK'").get(showroomId).n;
   const activeProtected = db.prepare("SELECT count(*) AS n FROM qr_units WHERE showroom_id = ? AND status = 'ACTIVE'").get(showroomId).n;
   const pendingActivation = db.prepare("SELECT count(*) AS n FROM qr_units WHERE showroom_id = ? AND status = 'PENDING_ACTIVATION'").get(showroomId).n;
-  const totalAllocated = db.prepare("SELECT count(*) AS n FROM qr_units WHERE showroom_id = ?").get(showroomId).n;
   const feesCollected = db.prepare("SELECT coalesce(sum(fee_collected), 0) AS total FROM qr_units WHERE showroom_id = ? AND status = 'ACTIVE'").get(showroomId).total;
+  const pendingDues = db.prepare("SELECT coalesce(sum(fee_collected), 0) AS total FROM qr_units WHERE showroom_id = ? AND is_showroom_pending = 1").get(showroomId).total;
+  const customerPaid = feesCollected - pendingDues;
+  const totalAllocated = readyStock + activeProtected + pendingActivation;
 
   // Recent Stock Requisitions
   const stockRequests = db.prepare('SELECT * FROM stock_requests WHERE showroom_id = ? ORDER BY created_at DESC LIMIT 8').all(showroomId);
 
   // Recent 10 Vehicle Decal Fitments
   const recentFitments = db.prepare(`
-    SELECT q.id, q.qr_id, q.status, q.fee_collected, q.payment_mode, coalesce(q.activated_at, q.updated_at) AS fitted_at,
-           v.registration, v.make, v.model, v.category, v.color,
+    SELECT q.id, q.qr_id, q.status, q.fee_collected, q.payment_mode, q.is_showroom_pending, coalesce(q.activated_at, q.updated_at) AS fitted_at,
+           v.registration, v.make, v.model, v.category, v.brand,
            u.name AS owner_name, u.phone AS owner_phone
     FROM qr_units q
     JOIN vehicles v ON v.id = q.vehicle_id
@@ -495,7 +582,9 @@ export function dealerDashboard(actor, requestedShowroomId = null) {
       activeProtected,
       pendingActivation,
       totalAllocated,
-      feesCollected
+      feesCollected,
+      pendingDues,
+      customerPaid
     },
     stockRequests,
     recentFitments,
@@ -601,35 +690,36 @@ export function dealerActivateDecal(actor, input) {
     rawCode = rawCode.split('/scan/').pop().split('?')[0].split('#')[0];
   }
 
-  let reg = String(input.registration || '').trim().toUpperCase().replace(/[\s-]/g, '');
-  const chassis = String(input.chassisNumber || input.chassis || '').trim().toUpperCase().replace(/[\s-]/g, '');
-  const engine = String(input.engineNumber || input.engine || '').trim().toUpperCase().replace(/[\s-]/g, '');
-
-  if (!reg && !chassis) {
-    throw new HttpError(400, 'Either a vehicle registration number OR chassis VIN number is required for showroom delivery.');
-  }
-
-  // If new showroom vehicle with pending RTO plate, assign temporary registration identifier
-  if (!reg) {
-    reg = `TEMP-${chassis.length >= 6 ? chassis.slice(-6) : id('temp').slice(-6)}`;
-  }
-
-  const make = String(input.make || '').trim();
-  const model = String(input.model || '').trim();
-  const category = String(input.category || 'Car').trim();
-  const color = String(input.color || '').trim();
-  const emergencyContact = input.emergencyContact ? normalizePhone(input.emergencyContact) : null;
-  const feeCollected = Number(input.feeCollected || 0);
-  const paymentMode = String(input.paymentMode || 'UPI').trim();
-  const ownerName = String(input.ownerName || '').trim();
+  // 1. Owner mobile number is primary & first
   const ownerPhone = input.ownerPhone ? normalizePhone(input.ownerPhone) : null;
+  if (!ownerPhone) throw new HttpError(400, 'Owner mobile number is required.');
+
+  // 2. Vehicle registration plate (or temporary plate)
+  let reg = String(input.registration || '').trim().toUpperCase().replace(/[\s-]/g, '');
+  if (!reg) {
+    reg = `TEMP-${id('reg').slice(-6).toUpperCase()}`;
+  }
+
+  // 3. Brand auto-select / chosen from dropdown
+  const brand = String(input.brand || input.make || 'Maruti Suzuki').trim();
+  const model = String(input.model || 'Standard Model').trim();
+  const category = String(input.category || 'Car').trim();
+  const ownerName = String(input.ownerName || '').trim();
+
+  // 4. Emergency contact details with relation
+  const emergency1Phone = input.emergency1Phone ? normalizePhone(input.emergency1Phone) : null;
+  const emergency1Relation = String(input.emergency1Relation || 'Father').trim();
+  const emergency2Phone = input.emergency2Phone ? normalizePhone(input.emergency2Phone) : null;
+  const emergency2Relation = String(input.emergency2Relation || 'Mother').trim();
+
+  // 5. Fixed single fee collection: ₹499 (with GST)
+  const feeCollected = 499;
+
+  // 6. Payment mode: UPI, Cash, Card, Showroom Payment (replaces Complimentary)
+  const paymentMode = ['UPI', 'Cash', 'Card', 'Showroom Payment'].includes(input.paymentMode) ? input.paymentMode : 'UPI';
+  const isShowroomPending = (paymentMode === 'Showroom Payment') ? 1 : 0;
 
   if (rawCode.length < 4 || rawCode.length > 200) throw new HttpError(400, 'Enter a valid QR decal identifier.');
-  if (reg.length < 4 || reg.length > 18) throw new HttpError(400, 'Enter a valid vehicle registration or chassis identifier.');
-  if (make.length < 2 || make.length > 60 || model.length < 1 || model.length > 60) throw new HttpError(400, 'Enter valid vehicle make and model values.');
-  if (!['Car', 'Two Wheeler', 'Motorcycle', 'Commercial'].includes(category)) throw new HttpError(400, 'Choose a supported vehicle category.');
-  if (!Number.isFinite(feeCollected) || feeCollected < 0 || feeCollected > 100000) throw new HttpError(400, 'Enter a valid collected fee.');
-  if (!['UPI', 'Cash', 'Card', 'Complimentary'].includes(paymentMode)) throw new HttpError(400, 'Choose a supported payment mode.');
 
   return transaction(() => {
     const q = db.prepare(`SELECT * FROM qr_units
@@ -642,56 +732,55 @@ export function dealerActivateDecal(actor, input) {
     }
     if (q.status !== 'SHOWROOM_STOCK') throw new HttpError(409, `QR decal ${q.qr_id} must be in SHOWROOM_STOCK before activation.`);
 
-    const byRegistration = db.prepare('SELECT * FROM vehicles WHERE registration = ?').get(reg);
-    const byChassis = chassis ? db.prepare('SELECT * FROM vehicles WHERE chassis_number = ?').get(chassis) : null;
-    if (byRegistration && byChassis && byRegistration.id !== byChassis.id) throw new HttpError(409, 'Registration and chassis belong to different vehicles.');
-    let v = byRegistration || byChassis;
+    let v = db.prepare('SELECT * FROM vehicles WHERE registration = ?').get(reg);
     const at = now();
     if (!v) {
       const vId = id('veh');
       db.prepare(`INSERT INTO vehicles
-        (id, registration, make, model, category, color, chassis_number, engine_number, emergency_contact, verification_status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'VERIFIED', ?)`)
-        .run(vId, reg, make, model, category, color || null, chassis || null, engine || null, emergencyContact, at);
+        (id, registration, make, model, category, brand, emergency_1_phone, emergency_1_relation, emergency_2_phone, emergency_2_relation, verification_status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'VERIFIED', ?)`)
+        .run(vId, reg, brand, model, category, brand, emergency1Phone, emergency1Relation, emergency2Phone, emergency2Relation, at);
       v = db.prepare('SELECT * FROM vehicles WHERE id = ?').get(vId);
     } else {
-      if (chassis && v.chassis_number && chassis !== v.chassis_number) throw new HttpError(409, 'Chassis number does not match the registered vehicle.');
-      if (engine && v.engine_number && engine !== v.engine_number) throw new HttpError(409, 'Engine number does not match the registered vehicle.');
-      db.prepare(`UPDATE vehicles SET chassis_number=coalesce(chassis_number,?),engine_number=coalesce(engine_number,?),
-        emergency_contact=coalesce(emergency_contact,?),color=coalesce(color,?) WHERE id=?`)
-        .run(chassis || null, engine || null, emergencyContact, color || null, v.id);
+      db.prepare(`UPDATE vehicles SET make=?,brand=?,emergency_1_phone=?,emergency_1_relation=?,emergency_2_phone=?,emergency_2_relation=? WHERE id=?`)
+        .run(brand, brand, emergency1Phone, emergency1Relation, emergency2Phone, emergency2Relation, v.id);
     }
 
     const alreadyActive = db.prepare("SELECT qr_id FROM qr_units WHERE vehicle_id=? AND status='ACTIVE' AND id<>?").get(v.id, q.id);
     if (alreadyActive) throw new HttpError(409, `Vehicle already has active QR ${alreadyActive.qr_id}.`);
 
-    if (ownerPhone) {
-      let owner = db.prepare('SELECT * FROM users WHERE phone = ?').get(ownerPhone);
-      if (owner && owner.role !== 'OWNER') throw new HttpError(409, 'This phone number belongs to a non-owner account.');
-      if (!owner) {
-        const uId = id('usr');
-        const pass = passwordRecord(randomBytes(32).toString('base64url'));
-        const email = `owner_${ownerPhone.slice(-6)}_${randomBytes(4).toString('hex')}@smarto.local`;
-        db.prepare(`INSERT INTO users (id, email, name, role, phone, password_salt, password_hash, created_at)
-          VALUES (?, ?, ?, 'OWNER', ?, ?, ?, ?)`)
-          .run(uId, email, ownerName || `Vehicle Owner (${reg})`, ownerPhone, pass.salt, pass.hash, at);
-        owner = db.prepare('SELECT * FROM users WHERE id = ?').get(uId);
-      }
-      if (v.owner_id && v.owner_id !== owner.id) throw new HttpError(409, 'Vehicle is already linked to a different owner account.');
-      db.prepare('UPDATE vehicles SET owner_id = ? WHERE id = ?').run(owner.id, v.id);
+    let owner = db.prepare('SELECT * FROM users WHERE phone = ?').get(ownerPhone);
+    if (owner && owner.role !== 'OWNER') throw new HttpError(409, 'This phone number belongs to a non-owner account.');
+    if (!owner) {
+      const uId = id('usr');
+      const pass = passwordRecord(randomBytes(32).toString('base64url'));
+      const email = `owner_${ownerPhone.slice(-6)}_${randomBytes(4).toString('hex')}@smartoqr.in`;
+      db.prepare(`INSERT INTO users (id, email, name, role, phone, password_salt, password_hash, created_at)
+        VALUES (?, ?, ?, 'OWNER', ?, ?, ?, ?)`)
+        .run(uId, email, ownerName || `Vehicle Owner (${reg})`, ownerPhone, pass.salt, pass.hash, at);
+      owner = db.prepare('SELECT * FROM users WHERE id = ?').get(uId);
+    }
+    db.prepare('UPDATE vehicles SET owner_id = ? WHERE id = ?').run(owner.id, v.id);
+
+    // If Showroom Payment, increment pending dues on showroom
+    if (isShowroomPending) {
+      db.prepare(`UPDATE showrooms SET pending_dues = coalesce(pending_dues, 0) + 499 WHERE id = ?`).run(showroomId);
     }
 
-    db.prepare(`UPDATE qr_units SET status='ACTIVE',vehicle_id=?,fee_collected=?,payment_mode=?,activated_at=?,activated_by=?,
+    db.prepare(`UPDATE qr_units SET status='ACTIVE',vehicle_id=?,fee_collected=?,payment_mode=?,is_showroom_pending=?,activated_at=?,activated_by=?,
       installation_confirmed_at=?,final_scan_confirmed_at=?,updated_at=? WHERE id=?`)
-      .run(v.id, feeCollected, paymentMode, at, actor.id, at, at, at, q.id);
+      .run(v.id, feeCollected, paymentMode, isShowroomPending, at, actor.id, at, at, at, q.id);
+
     db.prepare(`INSERT INTO inventory_events (id,qr_id,event_type,from_location,to_location,actor_id,reason,created_at)
       VALUES (?,?,'QR_ACTIVATED',?,?,?,?,?)`)
       .run(id('evt'), q.id, `SHOWROOM:${showroomId}`, `VEHICLE:${v.id}`, actor.id, `Verified showroom fitment to ${reg}`, at);
+
     audit(actor, 'DECAL_ACTIVATED', 'qr_unit', q.id, {
       qrId: q.qr_id,
       registration: reg,
       feeCollected,
       paymentMode,
+      isShowroomPending,
       ownerPhoneLast4: ownerPhone?.slice(-4) || null
     });
 
@@ -700,15 +789,18 @@ export function dealerActivateDecal(actor, input) {
       qrId: q.qr_id,
       publicToken: q.public_token,
       registration: reg,
-      make: v.make,
+      brand,
       model: v.model,
       category: v.category,
       feeCollected,
       paymentMode,
+      isShowroomPending,
       activatedAt: at
     };
   });
 }
+
+
 
 export function dealerLedger(actor, search = '') {
   const showroomId = getActorShowroomId(actor);
@@ -956,51 +1048,10 @@ export function storeCatalog() {
 }
 
 export function storeCreateOrder(input) {
-  const name = String(input.customerName || '').trim();
-  const phone = String(input.customerPhone || '').trim().replace(/[^0-9+]/g, '');
-  const address = String(input.address || '').trim();
-  const city = String(input.city || '').trim();
-  const stateVal = String(input.state || 'Bihar').trim();
-  const pincode = String(input.pincode || '').trim();
-  const sku = String(input.productSku || 'SMARTO-CAR-PACK').trim();
-  const quantity = parseInt(input.quantity, 10) || 1;
-
-  if (!name || name.length < 2) throw new HttpError(400, 'Please enter your full delivery name.');
-  const normalizedPhone = normalizePhone(phone);
-  if (!address || address.length < 5) throw new HttpError(400, 'Please enter your complete shipping street address.');
-  if (!city) throw new HttpError(400, 'Please enter your shipping city.');
-  const normalizedPincode = validatePincode(pincode);
-  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) throw new HttpError(400, 'Order quantity must be between 1 and 10 kits.');
-
-  const catalog = storeCatalog();
-  const prod = catalog.find(p => p.sku === sku);
-  if (!prod) throw new HttpError(400, 'Choose a valid store product.');
-  const unitPrice = prod.price;
-  const totalAmount = unitPrice * quantity;
-
-  const orderId = id('ord');
-  const at = now();
-  const accessToken = randomBytes(32).toString('base64url');
-  const accessTokenHash = createHash('sha256').update(accessToken).digest('hex');
-
-  db.prepare(`
-    INSERT INTO orders (id, customer_name, customer_phone, address, city, state, pincode, product_sku, product_name, quantity, unit_price, total_amount, payment_status, payment_mode, order_status, access_token_hash, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', NULL, 'AWAITING_PAYMENT', ?, ?)
-  `).run(orderId, name, normalizedPhone, address, city, stateVal, normalizedPincode, prod.sku, prod.name, quantity, unitPrice, totalAmount, accessTokenHash, at);
-
-  return {
-    success: true,
-    orderId,
-    accessToken,
-    productName: prod.name,
-    quantity,
-    totalAmount,
-    customerName: name,
-    paymentStatus: 'PENDING',
-    orderStatus: 'AWAITING_PAYMENT',
-    message: 'Order draft created. No payment or inventory allocation has occurred yet.'
-  };
+  throw new HttpError(403, 'Public retail ordering is currently restricted. SmartO Vehicle QR Decals are exclusively distributed via authorized dealership showrooms, and Child Safety Badges via affiliated schools.');
 }
+
+
 
 export function storeGetOrders(actor, customerPhone) {
   let clean;
@@ -1071,4 +1122,268 @@ export async function initiateMaskedCall(token, callerPhone, ip = 'unknown') {
     vehicle: `${q.make} ${q.model} (${q.registration})`,
     message: 'Masked call bridge initiated! Your phone will ring shortly from SmartO Private Relay, connecting you safely to the vehicle owner.'
   };
+}
+
+/* ==========================================================================
+   Batch Tracking & Auditing
+   ========================================================================== */
+
+export function listBatches() {
+  return db.prepare(`
+    SELECT b.*,
+      (SELECT count(*) FROM qr_units WHERE batch_id = b.id) AS total_units,
+      (SELECT count(*) FROM qr_units WHERE batch_id = b.id AND status = 'ACTIVE') AS active_count,
+      (SELECT count(*) FROM qr_units WHERE batch_id = b.id AND status = 'SHOWROOM_STOCK') AS showroom_count,
+      (SELECT count(*) FROM qr_units WHERE batch_id = b.id AND status = 'AGENT_STOCK') AS agent_count,
+      u.name AS creator_name
+    FROM batches b
+    LEFT JOIN users u ON u.id = b.created_by
+    ORDER BY b.created_at DESC
+    LIMIT 100
+  `).all();
+}
+
+export function getBatchDetails(batchId) {
+  const batch = db.prepare(`
+    SELECT b.*, u.name AS creator_name
+    FROM batches b
+    LEFT JOIN users u ON u.id = b.created_by
+    WHERE b.id = ?
+  `).get(batchId);
+  if (!batch) throw new HttpError(404, 'Batch not found.');
+
+  const units = db.prepare(`
+    SELECT q.id, q.qr_id, q.public_token, q.status, q.category, q.updated_at,
+           s.name AS showroom_name, v.registration, a.name AS agent_name
+    FROM qr_units q
+    LEFT JOIN showrooms s ON s.id = q.showroom_id
+    LEFT JOIN vehicles v ON v.id = q.vehicle_id
+    LEFT JOIN sales_agents a ON a.id = q.agent_id
+    WHERE q.batch_id = ?
+    ORDER BY q.qr_id ASC
+  `).all(batchId);
+
+  const statusSummary = {};
+  for (const u of units) {
+    statusSummary[u.status] = (statusSummary[u.status] || 0) + 1;
+  }
+
+  return { batch, statusSummary, units };
+}
+
+/* ==========================================================================
+   Sales Team / Field Agent Operations (3-Level Hierarchy)
+   ========================================================================== */
+
+export function listSalesAgents() {
+  return db.prepare(`
+    SELECT a.*,
+      (SELECT count(*) FROM qr_units WHERE agent_id = a.id) AS total_assigned,
+      (SELECT count(*) FROM qr_units WHERE agent_id = a.id AND status = 'AGENT_STOCK') AS in_hand_stock,
+      (SELECT count(*) FROM qr_units WHERE agent_id = a.id AND showroom_id IS NOT NULL) AS distributed_to_showrooms,
+      (SELECT count(*) FROM qr_units WHERE agent_id = a.id AND status = 'ACTIVE') AS activated_on_road
+    FROM sales_agents a
+    ORDER BY a.name ASC
+  `).all();
+}
+
+export function createSalesAgent(actor, input) {
+  const name = String(input.name || '').trim();
+  if (name.length < 2) throw new HttpError(400, 'Sales agent name is required.');
+  const phone = normalizePhone(input.phone);
+  const email = String(input.email || '').trim().toLowerCase();
+  const region = String(input.region || 'Bihar').trim();
+  const agentId = id('sag');
+  const at = now();
+
+  const existing = db.prepare('SELECT id FROM sales_agents WHERE phone = ?').get(phone);
+  if (existing) throw new HttpError(409, `An agent with phone ${phone} already exists.`);
+
+  db.prepare(`INSERT INTO sales_agents (id, name, phone, email, region, status, created_at)
+    VALUES (?, ?, ?, ?, ?, 'ACTIVE', ?)`).run(agentId, name, phone, email || null, region, at);
+
+  audit(actor, 'SALES_AGENT_CREATED', 'sales_agent', agentId, { name, phone, region });
+  return db.prepare('SELECT * FROM sales_agents WHERE id = ?').get(agentId);
+}
+
+export function allocateStockToAgent(actor, { agentId, quantity }) {
+  const agent = db.prepare('SELECT * FROM sales_agents WHERE id = ?').get(agentId);
+  if (!agent) throw new HttpError(404, 'Sales agent not found.');
+  const qty = parseInt(quantity, 10);
+  if (isNaN(qty) || qty < 1 || qty > 5000) throw new HttpError(400, 'Allocation quantity must be between 1 and 5,000 units.');
+
+  return transaction(() => {
+    // Pull sequential contiguous QRs from available unallocated central inventory
+    const availableQrs = db.prepare(`
+      SELECT id, qr_id FROM qr_units
+      WHERE agent_id IS NULL AND showroom_id IS NULL AND vehicle_id IS NULL
+        AND status IN ('CENTRAL_STOCK', 'QC_PASSED', 'PRINTED', 'GENERATED')
+      ORDER BY qr_id ASC
+      LIMIT ?
+    `).all(qty);
+
+    if (availableQrs.length < qty) {
+      throw new HttpError(409, `Only ${availableQrs.length} unallocated QRs are available in central inventory; ${qty} were requested.`);
+    }
+
+    const seriesStart = availableQrs[0].qr_id;
+    const seriesEnd = availableQrs[availableQrs.length - 1].qr_id;
+    const at = now();
+    const allocId = id('alc');
+
+    db.prepare(`INSERT INTO agent_allocations (id, agent_id, quantity, series_start, series_end, status, allocated_by, created_at)
+      VALUES (?, ?, ?, ?, ?, 'ACTIVE', ?, ?)`).run(allocId, agentId, qty, seriesStart, seriesEnd, actor.id, at);
+
+    const updateUnit = db.prepare(`UPDATE qr_units SET agent_id = ?, status = 'AGENT_STOCK', updated_at = ? WHERE id = ?`);
+    const insertEvt = db.prepare(`INSERT INTO inventory_events (id, qr_id, event_type, from_location, to_location, actor_id, reason, created_at)
+      VALUES (?, ?, 'AGENT_ALLOCATED', 'CENTRAL_STOCK', ?, ?, ?, ?)`);
+
+    for (const q of availableQrs) {
+      updateUnit.run(agentId, at, q.id);
+      insertEvt.run(id('evt'), q.id, `AGENT:${agentId}`, actor.id, `Field inventory allocation of ${qty} QRs to ${agent.name}`, at);
+    }
+
+    audit(actor, 'AGENT_ALLOCATION_CREATED', 'agent_allocation', allocId, { agentId, agentName: agent.name, qty, seriesStart, seriesEnd });
+    return { success: true, allocationId: allocId, quantity: qty, allocatedCount: qty, seriesStart, seriesEnd, agentName: agent.name };
+  });
+}
+
+export function distributeAgentStockToShowroom(actor, { agentId, showroomId, quantity }) {
+  const agent = db.prepare('SELECT * FROM sales_agents WHERE id = ?').get(agentId);
+  if (!agent) throw new HttpError(404, 'Sales agent not found.');
+  const shr = db.prepare('SELECT * FROM showrooms WHERE id = ?').get(showroomId);
+  if (!shr) throw new HttpError(404, 'Showroom not found.');
+  const qty = parseInt(quantity, 10);
+  if (isNaN(qty) || qty < 1) throw new HttpError(400, 'Enter a valid distribution quantity (e.g. 100).');
+
+  return transaction(() => {
+    const agentQrs = db.prepare(`
+      SELECT id, qr_id FROM qr_units
+      WHERE agent_id = ? AND showroom_id IS NULL AND status = 'AGENT_STOCK'
+      ORDER BY qr_id ASC
+      LIMIT ?
+    `).all(agentId, qty);
+
+    if (agentQrs.length < qty) {
+      throw new HttpError(409, `Agent ${agent.name} has only ${agentQrs.length} QRs in hand; ${qty} requested.`);
+    }
+
+    const seriesStart = agentQrs[0].qr_id;
+    const seriesEnd = agentQrs[agentQrs.length - 1].qr_id;
+    const at = now();
+
+    const updateUnit = db.prepare(`UPDATE qr_units SET showroom_id = ?, status = 'SHOWROOM_STOCK', updated_at = ? WHERE id = ?`);
+    const insertEvt = db.prepare(`INSERT INTO inventory_events (id, qr_id, event_type, from_location, to_location, actor_id, reason, created_at)
+      VALUES (?, ?, 'SHOWROOM_RECEIVED', ?, ?, ?, ?, ?)`);
+
+    for (const q of agentQrs) {
+      updateUnit.run(showroomId, at, q.id);
+      insertEvt.run(id('evt'), q.id, `AGENT:${agentId}`, `SHOWROOM:${showroomId}`, actor.id, `Distributed by field agent ${agent.name} to ${shr.name}`, at);
+    }
+
+    audit(actor, 'SHOWROOM_DISTRIBUTED', 'showroom', showroomId, { agentId, showroomId, qty, seriesStart, seriesEnd });
+    return { success: true, quantity: qty, distributedCount: qty, seriesStart, seriesEnd, showroomName: shr.name, agentName: agent.name };
+  });
+}
+
+/* ==========================================================================
+   School & Child Safety Operations
+   ========================================================================== */
+
+export function listSchools() {
+  return db.prepare(`
+    SELECT s.*,
+      (SELECT count(*) FROM children WHERE school_id = s.id) AS student_count
+    FROM schools s
+    ORDER BY s.name ASC
+  `).all();
+}
+
+export function createSchool(actor, input) {
+  const name = String(input.name || '').trim();
+  if (name.length < 3) throw new HttpError(400, 'School name is required.');
+  const city = String(input.city || 'Patna').trim();
+  const address = String(input.address || '').trim();
+  const principalName = String(input.principalName || '').trim();
+  const contactPhone = normalizePhone(input.contactPhone);
+  const count = db.prepare('SELECT count(*) AS n FROM schools').get().n + 1;
+  const code = String(input.code || `SCH-${city.slice(0, 3).toUpperCase()}-${String(count).padStart(3, '0')}`).trim().toUpperCase();
+  const schoolId = id('sch');
+  const at = now();
+
+  db.prepare(`INSERT INTO schools (id, name, code, city, address, principal_name, contact_phone, status, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, 'ACTIVE', ?)`).run(schoolId, name, code, city, address, principalName, contactPhone, at);
+
+  audit(actor, 'SCHOOL_CREATED', 'school', schoolId, { name, code, city });
+  return db.prepare('SELECT * FROM schools WHERE id = ?').get(schoolId);
+}
+
+export function registerChild(actor, input) {
+  const schoolId = String(input.schoolId || '');
+  const school = db.prepare('SELECT * FROM schools WHERE id = ?').get(schoolId);
+  if (!school) throw new HttpError(404, 'School not found.');
+
+  let q;
+  let rawCode = String(input.qrCode || '').trim();
+  if (rawCode.includes('/scan/')) rawCode = rawCode.split('/scan/').pop().split('?')[0];
+
+  if (rawCode) {
+    q = db.prepare('SELECT * FROM qr_units WHERE qr_id = ? OR id = ? OR public_token = ?').get(rawCode, rawCode, rawCode);
+    if (!q) throw new HttpError(404, 'School safety QR code not found.');
+    if (q.status === 'ACTIVE') throw new HttpError(409, 'This QR code is already assigned to an active student or vehicle.');
+  } else {
+    // Auto-pull from available school QR stock
+    q = db.prepare(`SELECT * FROM qr_units WHERE category = 'SCHOOL' AND status IN ('CENTRAL_STOCK', 'QC_PASSED', 'PRINTED', 'GENERATED') AND vehicle_id IS NULL ORDER BY qr_id ASC LIMIT 1`).get();
+    if (!q) {
+      // Auto-pull from general unallocated stock or create on the fly
+      q = db.prepare(`SELECT * FROM qr_units WHERE status IN ('CENTRAL_STOCK', 'QC_PASSED', 'PRINTED', 'GENERATED') AND vehicle_id IS NULL AND agent_id IS NULL AND showroom_id IS NULL ORDER BY qr_id ASC LIMIT 1`).get();
+    }
+    if (!q) {
+      // Create a sequential school badge QR on the fly
+      db.prepare(`INSERT OR IGNORE INTO qr_sequences (prefix, last_val) VALUES ('SCHBR', 0)`).run();
+      const seq = db.prepare(`SELECT last_val FROM qr_sequences WHERE prefix = 'SCHBR'`).get();
+      const nextVal = (seq?.last_val || 0) + 1;
+      db.prepare(`UPDATE qr_sequences SET last_val = ? WHERE prefix = 'SCHBR'`).run(nextVal);
+      const newQrId = `SCHBR-${String(nextVal).padStart(8, '0')}`;
+      const newUnitId = id('qr');
+      const newTok = token();
+      const atNow = now();
+      db.prepare(`INSERT INTO qr_units (id, qr_id, public_token, batch_id, category, status, created_at, updated_at) VALUES (?, ?, ?, null, 'SCHOOL', 'CENTRAL_STOCK', ?, ?)`).run(newUnitId, newQrId, newTok, atNow, atNow);
+      q = db.prepare('SELECT * FROM qr_units WHERE id = ?').get(newUnitId);
+    }
+  }
+
+  const childName = String(input.childName || '').trim();
+  if (!childName) throw new HttpError(400, 'Child name is required.');
+  const classSec = String(input.classSec || input.gradeClass || '').trim();
+  const rollNo = String(input.rollNo || '').trim();
+  const bloodGroup = String(input.bloodGroup || '').trim();
+  const parentName = String(input.parentName || input.fatherName || input.motherName || 'Parent / Guardian').trim();
+  const parentPhone1 = normalizePhone(input.parentPhone1 || input.fatherPhone || input.phone);
+  const parentPhone2 = (input.parentPhone2 || input.motherPhone) ? normalizePhone(input.parentPhone2 || input.motherPhone) : null;
+  const address = String(input.address || input.homeAddress || '').trim();
+  const emergencyNote = String(input.emergencyNote || '').trim();
+
+  const childId = id('chd');
+  const at = now();
+
+  return transaction(() => {
+    db.prepare(`INSERT INTO children (id, school_id, qr_id, child_name, class_sec, roll_no, blood_group, parent_name, parent_phone_1, parent_phone_2, address, emergency_note, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(childId, schoolId, q.id, childName, classSec, rollNo, bloodGroup, parentName, parentPhone1, parentPhone2, address, emergencyNote, at);
+
+    db.prepare(`UPDATE qr_units SET category = 'SCHOOL', status = 'ACTIVE', updated_at = ? WHERE id = ?`).run(at, q.id);
+
+    audit(actor, 'CHILD_REGISTERED', 'child', childId, { childName, qrId: q.qr_id, schoolId });
+    return { success: true, childId, childName, qrId: q.qr_id, badgeCode: q.qr_id, publicToken: q.public_token, schoolName: school.name };
+  });
+}
+
+export function listChildren(schoolId = null) {
+  const sql = `SELECT c.*, s.name AS school_name, q.qr_id, q.public_token
+    FROM children c
+    JOIN schools s ON s.id = c.school_id
+    JOIN qr_units q ON q.id = c.qr_id
+    ${schoolId ? 'WHERE c.school_id = ?' : ''}
+    ORDER BY c.created_at DESC LIMIT 200`;
+  return schoolId ? db.prepare(sql).all(schoolId) : db.prepare(sql).all();
 }

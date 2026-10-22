@@ -11,7 +11,7 @@ db.exec('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL; PRAGMA busy_timeou
 db.exec(`
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, name TEXT NOT NULL,
-  role TEXT NOT NULL CHECK(role IN ('ADMIN','OWNER','SHOWROOM_MANAGER')),
+  role TEXT NOT NULL CHECK(role IN ('ADMIN','OWNER','SHOWROOM_MANAGER','SALES_AGENT')),
   password_salt TEXT NOT NULL, password_hash TEXT NOT NULL, created_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS sessions (
@@ -86,11 +86,88 @@ addColumn("ALTER TABLE qr_units ADD COLUMN activated_at TEXT;");
 addColumn("ALTER TABLE qr_units ADD COLUMN activated_by TEXT REFERENCES users(id);");
 addColumn("ALTER TABLE qr_units ADD COLUMN installation_confirmed_at TEXT;");
 addColumn("ALTER TABLE qr_units ADD COLUMN final_scan_confirmed_at TEXT;");
+addColumn("ALTER TABLE qr_units ADD COLUMN category TEXT DEFAULT 'VEHICLE';");
+addColumn("ALTER TABLE qr_units ADD COLUMN agent_id TEXT;");
+addColumn("ALTER TABLE qr_units ADD COLUMN is_showroom_pending INTEGER DEFAULT 0;");
 addColumn("ALTER TABLE vehicles ADD COLUMN chassis_number TEXT;");
 addColumn("ALTER TABLE vehicles ADD COLUMN engine_number TEXT;");
 addColumn("ALTER TABLE vehicles ADD COLUMN emergency_contact TEXT;");
+addColumn("ALTER TABLE vehicles ADD COLUMN brand TEXT;");
+addColumn("ALTER TABLE vehicles ADD COLUMN emergency_1_phone TEXT;");
+addColumn("ALTER TABLE vehicles ADD COLUMN emergency_1_relation TEXT DEFAULT 'Father';");
+addColumn("ALTER TABLE vehicles ADD COLUMN emergency_2_phone TEXT;");
+addColumn("ALTER TABLE vehicles ADD COLUMN emergency_2_relation TEXT DEFAULT 'Mother';");
+
+addColumn("ALTER TABLE showrooms ADD COLUMN region TEXT DEFAULT 'Central Bihar';");
+addColumn("ALTER TABLE showrooms ADD COLUMN address TEXT;");
+addColumn("ALTER TABLE showrooms ADD COLUMN map_url TEXT;");
+addColumn("ALTER TABLE showrooms ADD COLUMN category TEXT DEFAULT 'Two Wheeler';");
+addColumn("ALTER TABLE showrooms ADD COLUMN brand TEXT DEFAULT 'Maruti Suzuki';");
+addColumn("ALTER TABLE showrooms ADD COLUMN owner_name TEXT;");
+addColumn("ALTER TABLE showrooms ADD COLUMN owner_phone TEXT;");
+addColumn("ALTER TABLE showrooms ADD COLUMN manager_name TEXT;");
+addColumn("ALTER TABLE showrooms ADD COLUMN manager_phone TEXT;");
+addColumn("ALTER TABLE showrooms ADD COLUMN pending_dues REAL DEFAULT 0;");
+
+addColumn("ALTER TABLE batches ADD COLUMN category TEXT DEFAULT 'VEHICLE';");
+addColumn("ALTER TABLE batches ADD COLUMN series_start TEXT;");
+addColumn("ALTER TABLE batches ADD COLUMN series_end TEXT;");
 
 db.exec(`
+CREATE TABLE IF NOT EXISTS qr_sequences (
+  prefix TEXT PRIMARY KEY,
+  last_val INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS sales_agents (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  phone TEXT NOT NULL UNIQUE,
+  email TEXT,
+  region TEXT DEFAULT 'Bihar',
+  status TEXT DEFAULT 'ACTIVE',
+  user_id TEXT,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS agent_allocations (
+  id TEXT PRIMARY KEY,
+  agent_id TEXT NOT NULL REFERENCES sales_agents(id),
+  quantity INTEGER NOT NULL,
+  series_start TEXT NOT NULL,
+  series_end TEXT NOT NULL,
+  status TEXT DEFAULT 'ACTIVE',
+  allocated_by TEXT REFERENCES users(id),
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS schools (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  code TEXT NOT NULL UNIQUE,
+  city TEXT NOT NULL,
+  address TEXT,
+  principal_name TEXT,
+  contact_phone TEXT NOT NULL,
+  status TEXT DEFAULT 'ACTIVE',
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS children (
+  id TEXT PRIMARY KEY,
+  school_id TEXT NOT NULL REFERENCES schools(id),
+  qr_id TEXT NOT NULL REFERENCES qr_units(id) UNIQUE,
+  child_name TEXT NOT NULL,
+  class_sec TEXT NOT NULL,
+  roll_no TEXT,
+  blood_group TEXT,
+  parent_name TEXT,
+  parent_phone_1 TEXT NOT NULL,
+  parent_phone_2 TEXT,
+  address TEXT,
+  emergency_note TEXT,
+  created_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS stock_requests (
   id TEXT PRIMARY KEY,
   showroom_id TEXT NOT NULL REFERENCES showrooms(id),
@@ -446,7 +523,32 @@ function seed() {
   }
 
   // Initialize fee collection on active vehicles
-  db.prepare(`UPDATE qr_units SET fee_collected = 299, payment_mode = 'UPI', activated_at = created_at WHERE status = 'ACTIVE' AND (fee_collected IS NULL OR fee_collected = 0)`).run();
+  db.prepare(`UPDATE qr_units SET fee_collected = 499, payment_mode = 'UPI', activated_at = created_at WHERE status = 'ACTIVE' AND (fee_collected IS NULL OR fee_collected = 0)`).run();
+
+  // Seed Sales Team Agents
+  const existingAgents = db.prepare('SELECT count(*) AS n FROM sales_agents').get().n;
+  if (existingAgents === 0) {
+    const putAgent = db.prepare(`INSERT INTO sales_agents (id, name, phone, email, region, status, created_at) VALUES (?, ?, ?, ?, ?, 'ACTIVE', ?)`);
+    const ag1 = id('sag');
+    const ag2 = id('sag');
+    putAgent.run(ag1, 'Vikrant Kumar (Field Ops Lead)', '+919876543210', 'vikrant@smartoqr.in', 'Patna / Central Bihar', now());
+    putAgent.run(ag2, 'Arun Kumar (Marketing & School Lead)', '+919876543211', 'arun@smartoqr.in', 'Bihar State Wide', now());
+
+    // Initialize sequence counter if empty
+    db.prepare(`INSERT OR IGNORE INTO qr_sequences (prefix, last_val) VALUES ('SVBR', 0)`).run();
+    db.prepare(`INSERT OR IGNORE INTO qr_sequences (prefix, last_val) VALUES ('BR-01', 0)`).run();
+    db.prepare(`INSERT OR IGNORE INTO qr_sequences (prefix, last_val) VALUES ('SCH', 0)`).run();
+  }
+
+  // Seed Demo Schools
+  const existingSchools = db.prepare('SELECT count(*) AS n FROM schools').get().n;
+  if (existingSchools === 0) {
+    const putSchool = db.prepare(`INSERT INTO schools (id, name, code, city, address, principal_name, contact_phone, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'ACTIVE', ?)`);
+    putSchool.run(id('sch'), "St. Michael's High School", 'SCH-PAT-001', 'Patna', 'Digha Ghat, Patna, Bihar 800011', 'Fr. Norbert Menezes', '+916122262532', now());
+    putSchool.run(id('sch'), 'Delhi Public School Patna', 'SCH-PAT-002', 'Patna', 'Danapur Cantonment, Patna, Bihar 801503', 'Dr. B. Singh', '+916122558800', now());
+    putSchool.run(id('sch'), 'Loyola High School', 'SCH-PAT-003', 'Patna', 'Kurji, Sadaquat Ashram, Patna, Bihar 800010', 'Bro. Joseph', '+916122262272', now());
+  }
 }
 
 seed();
+

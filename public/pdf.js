@@ -1,7 +1,7 @@
 // SmartO Pure-JS Multi-Page Vector & Canvas PDF Suite for Vehicle QR Decals
 // Works with Zero External Dependencies (Native Browser Canvas + PDF 1.4 Binary Assembler)
 
-import { generateOfficialStickerSvg } from './qr.js';
+import { generateOfficialStickerSvg, generateSchoolBadgeSvg } from './qr.js';
 
 const esc = (x) => String(x ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -114,7 +114,10 @@ export function buildPrintSheetHtml({ qrs, layout = '2x3', cutGuides = true, bat
 
     const cellsHtml = pageItems.map((item, idx) => {
       const scanUrl = `${location.origin}/scan/${encodeURIComponent(item.public_token)}`;
-      const svg = generateOfficialStickerSvg({ qrId: item.qr_id, scanUrl, size: layout === '2x2' ? 360 : (layout === '3x4' ? 180 : 260) });
+      const isSchool = item.category === 'SCHOOL' || item.batch_category === 'SCHOOL';
+      const svg = isSchool
+        ? generateSchoolBadgeSvg({ qrId: item.qr_id, scanUrl, size: layout === '2x2' ? 360 : (layout === '3x4' ? 180 : 260) })
+        : generateOfficialStickerSvg({ qrId: item.qr_id, scanUrl, size: layout === '2x2' ? 360 : (layout === '3x4' ? 180 : 260) });
       const overallIndex = p * perPage + idx + 1;
 
       return `
@@ -133,12 +136,13 @@ export function buildPrintSheetHtml({ qrs, layout = '2x3', cutGuides = true, bat
       `;
     }).join('');
 
+    const isSchoolBatch = batchName.toLowerCase().includes('school') || qrs[0]?.category === 'SCHOOL';
     pagesHtml += `
       <section class="a4-page">
         <header class="page-meta-header">
           <div class="meta-left">
-            <span class="brand-title">SMARTO INNOVATIONS • VEHICLE SAFETY NETWORK</span>
-            <span class="meta-sub">Official Cryptographic QR Decals • Govt. of Bihar Transport Specification</span>
+            <span class="brand-title">${isSchoolBatch ? 'SMARTO INNOVATIONS • CHILD SAFETY NETWORK' : 'SMARTO INNOVATIONS • VEHICLE SAFETY NETWORK'}</span>
+            <span class="meta-sub">${isSchoolBatch ? 'Official Acrylic Child Safety Badges • Emergency Guardian & SOS Alert' : 'Official Cryptographic QR Decals • Govt. of Bihar Transport Specification'}</span>
           </div>
           <div class="meta-right">
             <span><strong>Sheet:</strong> ${pageNum} of ${totalPages}</span>
@@ -514,9 +518,11 @@ export async function downloadDecalsPdf({ qrs, layout = '2x3', cutGuides = true,
         ctx.fillText('+', x + cellWidth - 14, y + cellHeight - 8);
       }
 
-      // Draw Sticker SVG to Canvas
       const scanUrl = `${location.origin}/scan/${encodeURIComponent(item.public_token)}`;
-      const svg = generateOfficialStickerSvg({ qrId: item.qr_id, scanUrl, size: 520 });
+      const isSchool = item.category === 'SCHOOL' || item.batch_category === 'SCHOOL';
+      const svg = isSchool
+        ? generateSchoolBadgeSvg({ qrId: item.qr_id, scanUrl, size: 520 })
+        : generateOfficialStickerSvg({ qrId: item.qr_id, scanUrl, size: 520 });
 
       const img = new Image();
       const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
